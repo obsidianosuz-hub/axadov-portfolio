@@ -43,6 +43,7 @@ export const CORRIDOR_TEXTURES = [
     '/textures/corridor/texturadrewnadonozekbiurka.webp',
     '/textures/corridor/ceiling_texture.webp',
     '/textures/corridor/avatar_sketch.webp',
+    '/textures/corridor/janitor.webp',
     // Double doors (end of corridor)
     '/textures/corridor/doors/frame_sketch.webp',
     '/textures/corridor/doors/doorrleft.webp',
