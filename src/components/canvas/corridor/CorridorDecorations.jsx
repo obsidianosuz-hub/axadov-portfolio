@@ -333,6 +333,13 @@ const CorridorDecorations = ({ segmentLength, zOffset, corridorWidth = 4, corrid
     const treeTexture = useTexture('/textures/corridor/drzewkowdoniczce.webp');
     const grateTexture = useTexture('/textures/corridor/kratkawentylacyjna.webp');
     const flowerTexture = useTexture('/textures/corridor/kwiatekwdoniczce.webp');
+    const janitorTexture = useTexture('/textures/corridor/janitor.webp');
+
+    useEffect(() => {
+        if (janitorTexture) {
+            janitorTexture.colorSpace = THREE.SRGBColorSpace;
+        }
+    }, [janitorTexture]);
 
     // --- Ceiling Lights (punkty światła) ---
     // Tekstury lamp
@@ -673,6 +680,20 @@ const CorridorDecorations = ({ segmentLength, zOffset, corridorWidth = 4, corrid
                     </mesh>
                 );
             })}
+
+            {/* === JANITOR (CLEANER) EASTER EGG === */}
+            <mesh
+                position={[-2.1, floorY + 1.3, zOffset - 25]} // Standing in front of the flat wall at Z = zOffset - 25
+                rotation={[0, Math.PI / 2 - 0.2, 0]} // Angled slightly towards the camera
+            >
+                <planeGeometry args={[2.148, 2.6]} />
+                <meshBasicMaterial color="#ffffff"
+                    map={janitorTexture}
+                    transparent={true}
+                    alphaTest={0.1}
+                    side={THREE.DoubleSide}
+                />
+            </mesh>
 
         </group >
     );
