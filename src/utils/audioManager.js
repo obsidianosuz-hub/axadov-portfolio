@@ -32,7 +32,19 @@ export const playBackgroundMusic = () => {
     bgMusicStarted = true;
     if (bgMusicAudio && bgMusicAudio.paused) {
         // Only play if not muted and it's currently paused
-        bgMusicAudio.play().catch((err) => {
+        bgMusicAudio.play().then(() => {
+            // Set browser media session metadata for OS control center
+            if (typeof window !== 'undefined' && 'mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: 'Love Story (Fairy Version)',
+                    artist: 'Indila',
+                    album: 'Axadov Portfolio',
+                    artwork: [
+                        { src: '/og-image.webp', sizes: '512x512', type: 'image/webp' }
+                    ]
+                });
+            }
+        }).catch((err) => {
             console.warn('Audio play failed/blocked by browser:', err);
         });
     }
