@@ -16,11 +16,18 @@ export const initAudio = () => {
 
     if (!bgMusicAudio) {
         // We use the file provided by the user in public/sounds/
-        bgMusicAudio = new Audio('/sounds/love_story_fairy.mp3');
+        bgMusicAudio = new Audio('/sounds/love_story_instrumental.mp3');
         bgMusicAudio.preload = 'auto'; // Force browser to fetch data immediately
         bgMusicAudio.loop = true;
         bgMusicAudio.volume = 0.3; // Default volume for background cozy music
         bgMusicAudio.muted = isMuted; // Apply synced mute state
+        
+        // Slow down and lower the pitch for the authentic "Fairy/Slowed" version
+        bgMusicAudio.defaultPlaybackRate = 0.88;
+        bgMusicAudio.playbackRate = 0.88;
+        bgMusicAudio.preservesPitch = false;
+        bgMusicAudio.mozPreservesPitch = false;
+        bgMusicAudio.webkitPreservesPitch = false;
 
         // Trigger background load
         bgMusicAudio.load();
