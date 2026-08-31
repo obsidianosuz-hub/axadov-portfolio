@@ -70,11 +70,11 @@ export const PROFILE_DATA = {
         },
         {
             id: 'project-2',
-            title: 'LOYIHA 2',
+            title: 'Sauna.uz Dashboard',
             front: '/textures/gallery/timberkittyprzod.webp', // Placeholder texture
             painted: '/textures/gallery/timberkittyprzod_painted.webp',
-            url: '#',
-            description: 'Bu yerda sizning ikkinchi loyihangiz tavsifi ko\'rsatiladi. Texnologiyalar va havolalarni sozlang.',
+            url: '/sauna-demo.html',
+            description: 'Hammam va sauna majmualari uchun avtomatlashtirilgan boshqaruv tizimi. Face ID orqali xavfsizlik nazorati, kameralar API tokenlari, ssenariylar kutubxonasi va xonalar holatini boshqarish imkonini beradi.',
             techStack: ['/textures/gallery/htmllogo.webp', '/textures/gallery/jslogo.webp', '/textures/gallery/csslogo.webp']
         }
     ],

@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>Hamom & Sauna Avtomatlashtirish Tizimi Dashboard</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --background: #f4f4f5;
+      --card: #ffffff;
+      --border: #e4e4e7;
+      --foreground: #09090b;
+      --muted-foreground: #71717a;
+      --primary: #09090b;
+      --primary-foreground: #ffffff;
+      --accent: #6366f1;
+    }
+    
+    .theme-dark {
+      --background: #09090b;
+      --card: #18181b;
+      --border: #27272a;
+      --foreground: #fafafa;
+      --muted-foreground: #a1a1aa;
+      --primary: #fafafa;
+      --primary-foreground: #09090b;
+      --accent: #818cf8;
+    }
+
+    .theme-gold {
+      --background: #110d06;
+      --card: #1c160c;
+      --border: #352a16;
+      --foreground: #fcf8f2;
+      --muted-foreground: #b89c72;
+      --primary: #c5a059;
+      --primary-foreground: #110d06;
+      --accent: #c5a059;
+    }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] min-h-screen font-sans transition-colors duration-200">
+  
+  <div class="flex min-h-screen">
+    
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-[var(--card)] border-r border-[var(--border)] p-6 flex flex-col justify-between">
+      <div class="space-y-6">
+        <!-- Logo -->
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-[var(--primary)] flex items-center justify-center text-[var(--primary-foreground)] font-bold text-lg">S</div>
+          <span class="font-bold tracking-tight text-lg">SAUNA.UZ</span>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="space-y-1.5" id="sidebar-nav">
+          <button onclick="switchTab('dashboard_home')" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-left text-xs font-bold transition hover:bg-[var(--background)]" id="nav-dashboard_home">
+            <span>🏠</span> <span data-i18n="nav_dashboard_home">Kunlik Statistika</span>
+          </button>
+          <button onclick="switchTab('rooms')" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-left text-xs font-bold transition hover:bg-[var(--background)]" id="nav-rooms">
+            <span>🛁</span> <span data-i18n="nav_rooms">Xonalar holati</span>
+          </button>
+          <button onclick="switchTab('staff')" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-left text-xs font-bold transition hover:bg-[var(--background)]" id="nav-staff">
+            <span>👤</span> <span data-i18n="nav_staff">Xodimlar & Davomat</span>
+          </button>
+          <button onclick="switchTab('face_id')" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-left text-xs font-bold transition bg-[var(--background)]" id="nav-face_id">
+            <span>📹</span> <span data-i18n="nav_face_id">Face ID Nazorati</span>
+          </button>
+          <button onclick="switchTab('settings')" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-left text-xs font-bold transition hover:bg-[var(--background)]" id="nav-settings">
+            <span>⚙️</span> <span data-i18n="nav_settings">Sozlamalar</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- User footer -->
+      <div class="bg-[var(--background)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-full bg-[var(--primary)] flex items-center justify-center font-bold text-[var(--primary-foreground)] text-sm">A</div>
+          <div>
+            <h4 class="text-xs font-bold leading-tight">Abdurasul</h4>
+            <span class="text-[10px] text-[var(--muted-foreground)] uppercase">Super Admin</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN BODY -->
+    <main class="flex-1 p-8 flex flex-col justify-between space-y-8">
+      
+      <!-- Topbar Header -->
+      <header class="flex justify-between items-center bg-[var(--card)] border border-[var(--border)] px-6 py-4 rounded-3xl shadow-sm">
+        <div class="flex items-center space-x-4">
+          <h2 class="text-base font-bold" data-i18n="dashboard_label">Boshqaruv Paneli</h2>
+          <div class="h-4 w-px bg-[var(--border)]"></div>
+          <span class="text-xs font-semibold text-[var(--muted-foreground)]" id="live-clock">12:38:27</span>
+        </div>
+      </header>
+
+      <!-- TABS CONTAINER -->
+      <div id="tab-content" class="flex-1">
+        
+        <!-- TAB: FACE ID & CAMERA CONTROL -->
+        <div id="tab-face_id" class="space-y-6">
+          
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- 1. Active Camera Links Table -->
+            <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] shadow-sm rounded-3xl p-6 space-y-4 text-left">
+              <div>
+                <h4 class="text-sm font-bold" data-i18n="camera_tokens_title">Faol Kamera Aloqalari va Tokenlar</h4>
+                <p class="text-[11px] text-[var(--muted-foreground)]" data-i18n="camera_tokens_desc">Tizimga ulangan kameralar, ularning aloqa turi va tokenlari ro'yxati</p>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-[11px]">
+                  <thead>
+                    <tr class="border-b border-[var(--border)] text-[var(--muted-foreground)] font-bold uppercase tracking-wider text-[8px] pb-2">
+                      <th class="pb-2" data-i18n="camera_name_label">Kamera Nomi</th>
+                      <th class="pb-2" data-i18n="connection_type_label">Aloqa Turi</th>
+                      <th class="pb-2" data-i18n="connection_address_label">Ulanish Manzili</th>
+                      <th class="pb-2" data-i18n="camera_permissions_label">Vazifasi</th>
+                      <th class="pb-2">API Token</th>
+                      <th class="pb-2 text-right" data-i18n="action">Amal</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-[var(--border)]" id="camera-tokens-tbody">
+                    <!-- Loaded dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 2. Camera Token Generator -->
+            <div class="bg-[var(--card)] border border-[var(--border)] shadow-sm rounded-3xl p-6 space-y-4 text-left">
+              <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider" data-i18n="camera_generator_title">Kamera Token Generator</h4>
+                <p class="text-[10px] text-[var(--muted-foreground)]" data-i18n="camera_generator_desc">Har bir kamera uchun bitta alohida ulanish va API tokenini yaratish</p>
+              </div>
+
+              <form onsubmit="generateCamera(event)" class="space-y-3">
+                <div class="space-y-1">
+                  <label class="block text-[9px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="camera_name_label">Kamera Nomi</label>
+                  <input id="form-cam-name" type="text" required placeholder="Masalan: Kassa oldi kamerasi" class="w-full border border-[var(--border)] rounded-xl px-3 py-2 bg-[var(--background)] focus:outline-none font-semibold text-xs text-[var(--foreground)]">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="connection_type_label">Aloqa Turi</label>
+                    <select id="form-cam-type" class="w-full border border-[var(--border)] rounded-xl px-3 py-2 bg-[var(--card)] text-xs text-[var(--foreground)]">
+                      <option value="USB">USB veb-kamera</option>
+                      <option value="RTSP">RTSP tarmoq oqimi</option>
+                      <option value="WIRELESS">Simsiz / API (Token)</option>
+                    </select>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="camera_permissions_label">Vazifasi</label>
+                    <select id="form-cam-perm" class="w-full border border-[var(--border)] rounded-xl px-3 py-2 bg-[var(--card)] text-xs text-[var(--foreground)]">
+                      <option value="full_access">To'liq (Kirish/Chiqish)</option>
+                      <option value="employee_efficiency">Samaradorlik (KPI/Davomat)</option>
+                      <option value="cashier_visitor_catcher">Kassa Oldi Visitor Catcher</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="space-y-1">
+                  <label class="block text-[9px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="connection_address_label">Ulanish Manzili</label>
+                  <input id="form-cam-address" type="text" required placeholder="COM3 yoki rtsp://..." class="w-full border border-[var(--border)] rounded-xl px-3 py-2 bg-[var(--background)] focus:outline-none font-semibold text-xs text-[var(--foreground)]">
+                </div>
+
+                <div class="space-y-1">
+                  <label class="block text-[9px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="select_script_label">Ssenariylar Kutubxonasidan Tanlash</label>
+                  <select id="form-cam-script-id" onchange="onFormScriptChange()" class="w-full border border-[var(--border)] rounded-xl px-3 py-2 bg-[var(--card)] text-xs text-[var(--foreground)]">
+                    <option value="">-- Kod tanlash --</option>
+                  </select>
+                </div>
+
+                <div class="space-y-1">
+                  <label class="block text-[9px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="camera_code_label">Ssenariy Kodi</label>
+                  <textarea id="form-cam-code" rows="3" class="w-full border border-[var(--border)] rounded-xl px-3 py-2 bg-[var(--background)] font-mono text-[9px] text-[var(--foreground)] focus:outline-none"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-[var(--primary)] text-[var(--primary-foreground)] text-[10px] font-bold py-2.5 rounded-xl hover:opacity-90 active:scale-95 transition" data-i18n="token_create_btn">Token Yaratish va Ulash</button>
+              </form>
+            </div>
+            
+          </div>
+
+          <!-- SSENARIYLAR KUTUBXONASI VA INTEGRATSIYA BO'LIMI -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            
+            <!-- 1. Custom Scripts Database Library -->
+            <div class="bg-[var(--card)] border border-[var(--border)] shadow-sm rounded-3xl p-6 text-left space-y-4">
+              <div>
+                <h4 class="text-sm font-bold flex items-center">
+                  <span class="w-2.5 h-2.5 bg-indigo-500 rounded-full mr-2"></span>
+                  <span data-i18n="script_library_title">Ssenariy Kodlar Kutubxonasi</span>
+                </h4>
+                <p class="text-[11px] text-[var(--muted-foreground)]" data-i18n="script_library_desc">Kameralarga biriktirish uchun qayta ishlatiladigan ssenariylar bazasi</p>
+              </div>
+
+              <!-- List -->
+              <div class="overflow-y-auto max-h-48 border border-[var(--border)] rounded-xl p-1 bg-[var(--background)]">
+                <table class="w-full text-left border-collapse text-[10px]">
+                  <thead>
+                    <tr class="border-b border-[var(--border)] text-[var(--muted-foreground)] font-bold uppercase tracking-wider text-[7px] pb-1">
+                      <th class="pb-1" data-i18n="name">Nomi</th>
+                      <th class="pb-1" data-i18n="description">Tavsif</th>
+                      <th class="pb-1 text-right" data-i18n="action">Amal</th>
+                    </tr>
+                  </thead>
+                  <tbody id="scripts-tbody">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Form -->
+              <form onsubmit="addScript(event)" class="space-y-3 pt-3 border-t border-[var(--border)]">
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="space-y-1">
+                    <label class="block text-[8px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="script_name">Ssenariy Nomi</label>
+                    <input id="script-title" type="text" required placeholder="Masalan: Kassa Nazorati" class="w-full border border-[var(--border)] rounded-xl px-3 py-1.5 bg-[var(--card)] text-xs text-[var(--foreground)]">
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[8px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="description">Tavsif</label>
+                    <input id="script-desc" type="text" placeholder="Qisqacha maqsadi" class="w-full border border-[var(--border)] rounded-xl px-3 py-1.5 bg-[var(--card)] text-xs text-[var(--foreground)]">
+                  </div>
+                </div>
+                <div class="space-y-1">
+                  <label class="block text-[8px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="script_code">Ssenariy Kodi</label>
+                  <textarea id="script-code" required rows="2" class="w-full border border-[var(--border)] rounded-xl px-3 py-2 bg-[var(--background)] font-mono text-[9px] text-[var(--foreground)]"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-[var(--primary)] text-[var(--primary-foreground)] text-[9px] font-bold py-2 rounded-xl" data-i18n="add_to_library">Kutubxonaga Qo'shish</button>
+              </form>
+            </div>
+
+            <!-- 2. Camera-to-Script Integration Panel -->
+            <div class="bg-[var(--card)] border border-[var(--border)] shadow-sm rounded-3xl p-6 text-left space-y-4 flex flex-col justify-between">
+              <div>
+                <h4 class="text-sm font-bold flex items-center">
+                  <span class="w-2.5 h-2.5 bg-violet-500 rounded-full mr-2"></span>
+                  <span data-i18n="camera_integration_title">Kamera va Kod Integratsiyasi</span>
+                </h4>
+                <p class="text-[11px] text-[var(--muted-foreground)]" data-i18n="camera_integration_desc">Tanlangan kamerani kutubxonadagi maxsus ssenariyga bog'lash</p>
+              </div>
+
+              <!-- Mappings list -->
+              <div class="overflow-y-auto max-h-48 border border-[var(--border)] rounded-xl p-1 bg-[var(--background)] flex-1">
+                <table class="w-full text-left border-collapse text-[10px]">
+                  <thead>
+                    <tr class="border-b border-[var(--border)] text-[var(--muted-foreground)] font-bold uppercase tracking-wider text-[7px] pb-1">
+                      <th class="pb-1" data-i18n="camera_name_label">Kamera Nomi</th>
+                      <th class="pb-1" data-i18n="select_script">Birlashtirilgan Ssenariy</th>
+                      <th class="pb-1 text-right" data-i18n="camera_integration_title">Integratsiya</th>
+                    </tr>
+                  </thead>
+                  <tbody id="mappings-tbody">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Integration tool form -->
+              <form onsubmit="integrateCameraScript(event)" class="space-y-3 pt-3 border-t border-[var(--border)]">
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="space-y-1">
+                    <label class="block text-[8px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="select_camera">Kamerani Tanlang</label>
+                    <select id="map-camera-select" class="w-full border border-[var(--border)] rounded-xl px-3 py-1.5 bg-[var(--card)] text-xs text-[var(--foreground)]"></select>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[8px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="select_script">Ssenariyni Tanlang</label>
+                    <select id="map-script-select" class="w-full border border-[var(--border)] rounded-xl px-3 py-1.5 bg-[var(--card)] text-xs text-[var(--foreground)]"></select>
+                  </div>
+                </div>
+                <button type="submit" class="w-full bg-violet-600 text-white text-[9px] font-bold py-2 rounded-xl hover:bg-violet-700 transition" data-i18n="integrate_btn">⚡ Integratsiya qilish (Ulash)</button>
+              </form>
+            </div>
+            
+          </div>
+
+          <!-- KASSA OLDI SNAPSHOT TARIXI -->
+          <div class="bg-[var(--card)] border border-[var(--border)] shadow-sm rounded-3xl p-6 text-left space-y-4">
+            <div>
+              <h4 class="text-sm font-bold flex items-center">
+                <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full mr-2"></span>
+                <span data-i18n="visitor_logs_title">Kassa Oldida Aniqlangan Yangi Yuzlar</span>
+              </h4>
+              <p class="text-[11px] text-[var(--muted-foreground)]" data-i18n="visitor_logs_desc">Kun davomida kassa oldidagi yuz aniqlash datchigi orqali olingan snapshots tarixi</p>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4" id="visitor-log-container">
+              <!-- Dynamically populated visitor cards -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- OTHER TABS PLACEHOLDER -->
+        <div id="tab-dashboard_home" class="space-y-6 hidden">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 text-left space-y-2">
+              <h4 class="text-xs text-[var(--muted-foreground)] font-semibold uppercase">Bugungi tushum</h4>
+              <p class="text-2xl font-bold text-emerald-600">8,450,000 UZS</p>
+            </div>
+            <div class="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 text-left space-y-2">
+              <h4 class="text-xs text-[var(--muted-foreground)] font-semibold uppercase">Faol xonalar</h4>
+              <p class="text-2xl font-bold">12 / 18 xona</p>
+            </div>
+            <div class="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 text-left space-y-2">
+              <h4 class="text-xs text-[var(--muted-foreground)] font-semibold uppercase">Mijozlar soni</h4>
+              <p class="text-2xl font-bold">48 nafar</p>
+            </div>
+            <div class="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 text-left space-y-2">
+              <h4 class="text-xs text-[var(--muted-foreground)] font-semibold uppercase">Faol datchiklar</h4>
+              <p class="text-2xl font-bold text-emerald-500">Normal (COM3)</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-rooms" class="space-y-6 hidden">
+          <h3 class="text-lg font-bold text-left">Hammam & Sauna Xonalari Holati</h3>
+          <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4" id="rooms-grid">
+            <!-- Dynamic Room layouts -->
+          </div>
+        </div>
+
+        <div id="tab-staff" class="space-y-6 hidden">
+          <h3 class="text-lg font-bold text-left">Xodimlar Davomati va KPI Hisobotlari</h3>
+          <div class="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 overflow-x-auto text-left">
+            <table class="w-full border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-[var(--border)] text-[var(--muted-foreground)] pb-2">
+                  <th class="pb-2">Ism</th>
+                  <th class="pb-2">Lavozim</th>
+                  <th class="pb-2">KPI ball</th>
+                  <th class="pb-2">Bugungi holat</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b border-[var(--border)]">
+                  <td class="py-3">Aliyev Valijon</td>
+                  <td class="py-3">Menejer</td>
+                  <td class="py-3 text-emerald-600 font-bold">95</td>
+                  <td class="py-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[10px]">Ish joyida</span></td>
+                </tr>
+                <tr class="border-b border-[var(--border)]">
+                  <td class="py-3">Karimov Sunnat</td>
+                  <td class="py-3">Kassir</td>
+                  <td class="py-3 text-amber-500 font-bold">78</td>
+                  <td class="py-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[10px]">Ish joyida</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tab-settings" class="space-y-6 hidden">
+          <div class="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-8 max-w-xl mx-auto text-left space-y-6">
+            
+            <div class="border-b border-[var(--border)] pb-3">
+              <h3 class="text-lg font-bold">Tizim Sozlamalari</h3>
+            </div>
+
+            <!-- Language -->
+            <div class="flex justify-between items-center">
+              <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider" data-i18n="lang_label">Tizim tili</h4>
+                <p class="text-[10px] text-[var(--muted-foreground)]">Interfeys ko'rsatish tilini o'zgartirish</p>
+              </div>
+              <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-[var(--background)] border border-[var(--border)] rounded-xl px-3 py-1.5 text-xs text-[var(--foreground)]">
+                <option value="uz">O'zbekcha (UZ)</option>
+                <option value="ru">Русский (RU)</option>
+                <option value="en">English (EN)</option>
+                <option value="tr">Türkçe (TR)</option>
+              </select>
+            </div>
+
+            <!-- Theme -->
+            <div class="flex justify-between items-center">
+              <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider" data-i18n="theme_label">Ranglar Mavzusi</h4>
+                <p class="text-[10px] text-[var(--muted-foreground)]">Dizayn rangini sozlash</p>
+              </div>
+              <select id="theme-select" onchange="changeTheme(this.value)" class="bg-[var(--background)] border border-[var(--border)] rounded-xl px-3 py-1.5 text-xs text-[var(--foreground)]">
+                <option value="light">Yorug' (Classic)</option>
+                <option value="dark">Qorong'i (Night)</option>
+                <option value="gold">Gold (Premium)</option>
+              </select>
+            </div>
+            
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    // Local memory state for the simulation
+    let currentLang = 'uz';
+    const translations = {
+      uz: {
+        dashboard_label: "Boshqaruv Paneli",
+        nav_dashboard_home: "Kunlik Statistika",
+        nav_rooms: "Xonalar holati",
+        nav_staff: "Xodimlar & Davomat",
+        nav_face_id: "Face ID Nazorati",
+        nav_settings: "Sozlamalar",
+        camera_tokens_title: "Faol Kamera Aloqalari va Tokenlar",
+        camera_tokens_desc: "Tizimga ulangan kameralar, ularning aloqa turi va tokenlari ro'yxati",
+        camera_generator_title: "Kamera Token Generator",
+        camera_generator_desc: "Har bir kamera uchun bitta alohida ulanish va API tokenini yaratish",
+        camera_name_label: "Kamera Nomi",
+        connection_type_label: "Aloqa Turi",
+        camera_permissions_label: "Vazifasi",
+        connection_address_label: "Ulanish Manzili",
+        camera_purpose_label: "Tavsif (Maqsadi)",
+        camera_code_label: "Ssenariy Kodi / Algoritm",
+        token_create_btn: "Token Yaratish va Ulash",
+        select_script_label: "Ssenariylar Kutubxonasidan Tanlash",
+        script_library_title: "Ssenariy Kodlar Kutubxonasi",
+        script_library_desc: "Kameralarga biriktirish uchun qayta ishlatiladigan ssenariylar bazasi",
+        camera_integration_title: "Kamera va Kod Integratsiyasi",
+        camera_integration_desc: "Tanlangan kamerani kutubxonadagi maxsus ssenariyga bog'lash",
+        script_name: "Ssenariy Nomi",
+        script_code: "Ssenariy Kodi",
+        description: "Tavsif",
+        select_camera: "Kamerani Tanlang",
+        select_script: "Ssenariyni Tanlang",
+        integrate_btn: "Integratsiya qilish (Ulash)",
+        add_to_library: "Kutubxonaga Qo'shish",
+        visitor_logs_title: "Kassa Oldida Aniqlangan Yangi Yuzlar",
+        visitor_logs_desc: "Kun davomida kassa oldidagi yuz aniqlash datchigi orqali olingan snapshots tarixi",
+        name: "Nomi",
+        action: "Amal",
+        lang_label: "Tizim tili",
+        theme_label: "Ranglar Mavzusi"
+      },
+      ru: {
+        dashboard_label: "Панель Управления",
+        nav_dashboard_home: "Ежедневная статистика",
+        nav_rooms: "Состояние комнат",
+        nav_staff: "Сотрудники и явка",
+        nav_face_id: "Контроль Face ID",
+        nav_settings: "Настройки",
+        camera_tokens_title: "Активные подключения камер и токены",
+        camera_tokens_desc: "Список подключенных к системе камер, их типов связи и токенов безопасности",
+        camera_generator_title: "Генератор токенов камер",
+        camera_generator_desc: "Создание отдельного подключения и токена API для каждой камеры",
+        camera_name_label: "Название камеры",
+        connection_type_label: "Тип связи",
+        camera_permissions_label: "Задача камеры",
+        connection_address_label: "Адрес подключения",
+        camera_purpose_label: "Описание (Цель)",
+        camera_code_label: "Сценарий / Код алгоритма для камеры",
+        token_create_btn: "Создать токен и подключить",
+        select_script_label: "Выбрать из библиотеки сценариев",
+        script_library_title: "Библиотека кодов сценариев",
+        script_library_desc: "База многократных кодов/сценариев для привязки к камерам",
+        camera_integration_title: "Интеграция камеры и кода",
+        camera_integration_desc: "Привязка выбранной камеры к сценарию из библиотеки",
+        script_name: "Название сценария",
+        script_code: "Код сценария",
+        description: "Описание",
+        select_camera: "Выберите камеру",
+        select_script: "Выберите сценарий",
+        integrate_btn: "Интегрировать",
+        add_to_library: "Добавить в библиотеку",
+        visitor_logs_title: "Новые лица, обнаруженные у кассы",
+        visitor_logs_desc: "История снимков новых клиентов у кассы в течение дня",
+        name: "Имя",
+        action: "Действие",
+        lang_label: "Язык системы",
+        theme_label: "Цветовая тема"
+      },
+      en: {
+        dashboard_label: "Control Panel",
+        nav_dashboard_home: "Daily Statistics",
+        nav_rooms: "Rooms Status",
+        nav_staff: "Staff & Attendance",
+        nav_face_id: "Face ID Control",
+        nav_settings: "Settings",
+        camera_tokens_title: "Active Camera Connections & Tokens",
+        camera_tokens_desc: "List of cameras connected to the system, their connection types, and security tokens",
+        camera_generator_title: "Camera Token Generator",
+        camera_generator_desc: "Generate a separate connection and API token for each camera",
+        camera_name_label: "Camera Name",
+        connection_type_label: "Connection Type",
+        camera_permissions_label: "Camera Role",
+        connection_address_label: "Connection Address",
+        camera_purpose_label: "Description (Purpose)",
+        camera_code_label: "Camera Scenario Script / Algorithm",
+        token_create_btn: "Generate Token and Connect",
+        select_script_label: "Select from Script Library",
+        script_library_title: "Scenario Scripts Library",
+        script_library_desc: "Database of reusable automation codes/scripts to bind with cameras",
+        camera_integration_title: "Camera & Script Integration",
+        camera_integration_desc: "Bind selected camera to a custom scenario from script library",
+        script_name: "Script Title",
+        script_code: "Script Code",
+        description: "Description",
+        select_camera: "Select Camera",
+        select_script: "Select Script",
+        integrate_btn: "Integrate",
+        add_to_library: "Add to Library",
+        visitor_logs_title: "New Faces Detected at Cash Counter",
+        visitor_logs_desc: "Snapshot history of new customer faces captured by face recognition sensor at register",
+        name: "Name",
+        action: "Action",
+        lang_label: "System Language",
+        theme_label: "Color Theme"
+      }
+    };
+
+    let cameras = [
+      { id: 1, name: "Turniket plansheti", connectionType: "USB", connectionAddress: "COM3", permissions: "full_access", token: "tok_sauna_87ab09", scriptTitle: "Kirish nazorati" },
+      { id: 2, name: "Kassa oldi datchigi", connectionType: "WIRELESS", connectionAddress: "REMOTE_API", permissions: "cashier_visitor_catcher", token: "tok_sauna_12ff78", scriptTitle: "Mijoz snap catcher" }
+    ];
+
+    let scripts = [
+      { id: 1, title: "Kirish nazorati", description: "Yuz biometriyasini o'qib kpi va davomatga yozadi", code: "if detect_face() == 'worker':\n    checkin()\nelse:\n    reject()" },
+      { id: 2, title: "Mijoz snap catcher", description: "Kassadagi yangi yuzlarni rasmga olib saqlaydi", code: "if detect_face() == 'Stranger':\n    save_snapshot()\n    log_visitor()" }
+    ];
+
+    let visitors = [
+      { id: 1, name: "Turniket 1", time: "12:30:15", date: "31.08.2026", emoji: "👤" },
+      { id: 2, name: "Kassa plansheti", time: "12:32:48", date: "31.08.2026", emoji: "👥" }
+    ];
+
+    let rooms = [];
+    for(let i=1; i<=18; i++) {
+      rooms.push({ id: i, type: i<=9 ? 'Hammam' : 'Sauna', active: i % 3 !== 0, occupiedBy: i % 3 !== 0 ? `Mehmon (Karta #${i+100})` : '' });
+    }
+
+    // Function to translate components
+    function updateTranslations() {
+      const lang = currentLang;
+      const dict = translations[lang] || translations['uz'];
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (dict[key]) {
+          el.innerText = dict[key];
+        }
+      });
+    }
+
+    // Function to render cameras
+    function renderCameras() {
+      const tbody = document.getElementById("camera-tokens-tbody");
+      tbody.innerHTML = "";
+      cameras.forEach(cam => {
+        const tr = document.createElement("tr");
+        tr.className = "text-zinc-700 dark:text-zinc-300 font-semibold border-b border-[var(--border)]";
+        tr.innerHTML = `
+          <td class="py-2.5 font-bold">${cam.name}</td>
+          <td class="py-2.5">${cam.connectionType}</td>
+          <td class="py-2.5 font-mono text-[9.5px]">${cam.connectionAddress}</td>
+          <td class="py-2.5">${cam.permissions}</td>
+          <td class="py-2.5"><span class="bg-[var(--background)] px-1.5 py-0.5 rounded border border-[var(--border)] font-mono text-[9px]">${cam.token.substring(0,10)}...</span></td>
+          <td class="py-2.5 text-right"><button onclick="deleteCamera(${cam.id})" class="text-rose-500 hover:text-rose-700 font-bold">O'chirish</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Update forms select list
+      const camSelect = document.getElementById("map-camera-select");
+      camSelect.innerHTML = "";
+      cameras.forEach(cam => {
+        const opt = document.createElement("option");
+        opt.value = cam.id;
+        opt.innerText = cam.name;
+        camSelect.appendChild(opt);
+      });
+    }
+
+    // Function to render scripts
+    function renderScripts() {
+      const tbody = document.getElementById("scripts-tbody");
+      tbody.innerHTML = "";
+      scripts.forEach(sc => {
+        const tr = document.createElement("tr");
+        tr.className = "border-b border-[var(--border)] text-zinc-700 font-semibold last:border-0";
+        tr.innerHTML = `
+          <td class="py-1.5 font-bold">${sc.title}</td>
+          <td class="py-1.5 truncate max-w-[120px]">${sc.description || '-'}</td>
+          <td class="py-1.5 text-right space-x-1.5">
+            <button onclick="alert('Kod:\\n\\n' + \`${sc.code.replace(/\n/g, '\\n')}\`)" class="text-indigo-600 font-bold">Kod</button>
+            <button onclick="deleteScript(${sc.id})" class="text-rose-500 font-bold">X</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Update select lists
+      const formScriptSelect = document.getElementById("form-cam-script-id");
+      formScriptSelect.innerHTML = `<option value="">-- Kod tanlash --</option>`;
+      scripts.forEach(sc => {
+        const opt = document.createElement("option");
+        opt.value = sc.id;
+        opt.innerText = sc.title;
+        formScriptSelect.appendChild(opt);
+      });
+
+      const mapScriptSelect = document.getElementById("map-script-select");
+      mapScriptSelect.innerHTML = `<option value="">Ssenariyni bekor qilish (Standart)</option>`;
+      scripts.forEach(sc => {
+        const opt = document.createElement("option");
+        opt.value = sc.id;
+        opt.innerText = sc.title;
+        mapScriptSelect.appendChild(opt);
+      });
+    }
+
+    // Function to render mappings
+    function renderMappings() {
+      const tbody = document.getElementById("mappings-tbody");
+      tbody.innerHTML = "";
+      cameras.forEach(cam => {
+        const tr = document.createElement("tr");
+        tr.className = "border-b border-[var(--border)] text-zinc-700 font-semibold last:border-0";
+        tr.innerHTML = `
+          <td class="py-1.5 font-bold">${cam.name}</td>
+          <td class="py-1.5">
+            ${cam.scriptTitle ? `<span class="bg-violet-50 text-violet-700 border border-violet-100 px-1.5 py-0.5 rounded text-[8px] font-bold">${cam.scriptTitle}</span>` : `<span class="text-zinc-400 italic text-[9px]">Ulanmagan (Standart)</span>`}
+          </td>
+          <td class="py-1.5 text-right">
+            ${cam.scriptTitle ? `<span class="text-emerald-600 font-bold text-[9px]">⚡ FAOL INTEGRATSIYA</span>` : `<span class="text-zinc-400">-</span>`}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Render visitor snapshots
+    function renderVisitors() {
+      const container = document.getElementById("visitor-log-container");
+      container.innerHTML = "";
+      visitors.forEach(vis => {
+        const card = document.createElement("div");
+        card.className = "bg-[var(--card)] border border-[var(--border)] rounded-2xl p-3 flex flex-col items-center space-y-2 text-center relative overflow-hidden group";
+        card.innerHTML = `
+          <div class="w-12 h-12 rounded-full border border-[var(--border)] bg-[var(--background)] flex items-center justify-center text-xl shadow-inner">${vis.emoji}</div>
+          <div class="space-y-0.5 w-full">
+            <div class="text-[9px] font-bold truncate">${vis.name}</div>
+            <div class="text-[8px] text-[var(--muted-foreground)] font-mono">${vis.time}</div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Render rooms layout
+    function renderRooms() {
+      const grid = document.getElementById("rooms-grid");
+      grid.innerHTML = "";
+      rooms.forEach(rm => {
+        const card = document.createElement("div");
+        card.className = `border rounded-2xl p-4 text-left space-y-2 ${rm.active ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-[var(--card)] border-[var(--border)]'}`;
+        card.innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold">${rm.type} #${rm.id}</span>
+            <span class="w-2 h-2 rounded-full ${rm.active ? 'bg-emerald-500' : 'bg-zinc-300'}"></span>
+          </div>
+          <p class="text-[9px] text-[var(--muted-foreground)]">${rm.active ? rm.occupiedBy : 'Bo\'sh (Tayyor)'}</p>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Form handlers
+    function generateCamera(e) {
+      e.preventDefault();
+      const name = document.getElementById("form-cam-name").value;
+      const type = document.getElementById("form-cam-type").value;
+      const address = document.getElementById("form-cam-address").value;
+      const perm = document.getElementById("form-cam-perm").value;
+      const scriptId = document.getElementById("form-cam-script-id").value;
+      
+      let scriptTitle = "";
+      if (scriptId) {
+        const selected = scripts.find(s => s.id === Number(scriptId));
+        if (selected) scriptTitle = selected.title;
+      }
+
+      cameras.push({
+        id: Date.now(),
+        name,
+        connectionType: type,
+        connectionAddress: address,
+        permissions: perm,
+        token: "tok_sauna_" + Math.random().toString(36).substring(2, 8),
+        scriptTitle
+      });
+
+      renderCameras();
+      renderMappings();
+      e.target.reset();
+    }
+
+    // Script library helpers
+    function addScript(e) {
+      e.preventDefault();
+      const title = document.getElementById("script-title").value;
+      const description = document.getElementById("script-desc").value;
+      const code = document.getElementById("script-code").value;
+
+      scripts.push({
+        id: Date.now(),
+        title,
+        description,
+        code
+      });
+
+      renderScripts();
+      e.target.reset();
+    }
+
+    function integrateCameraScript(e) {
+      e.preventDefault();
+      const camId = document.getElementById("map-camera-select").value;
+      const scriptId = document.getElementById("map-script-select").value;
+
+      const cam = cameras.find(c => c.id === Number(camId));
+      if (cam) {
+        if (scriptId) {
+          const sc = scripts.find(s => s.id === Number(scriptId));
+          cam.scriptTitle = sc ? sc.title : "";
+        } else {
+          cam.scriptTitle = "";
+        }
+      }
+
+      renderMappings();
+      e.target.reset();
+    }
+
+    function deleteCamera(id) {
+      cameras = cameras.filter(c => c.id !== id);
+      renderCameras();
+      renderMappings();
+    }
+
+    function deleteScript(id) {
+      scripts = scripts.filter(s => s.id !== id);
+      cameras.forEach(c => {
+        c.scriptTitle = "";
+      });
+      renderScripts();
+      renderMappings();
+    }
+
+    function onFormScriptChange() {
+      const scriptId = document.getElementById("form-cam-script-id").value;
+      const codeArea = document.getElementById("form-cam-code");
+      if (scriptId) {
+        const sc = scripts.find(s => s.id === Number(scriptId));
+        codeArea.value = sc ? sc.code : "";
+      } else {
+        codeArea.value = "";
+      }
+    }
+
+    // Settings helpers
+    function changeLanguage(lang) {
+      currentLang = lang;
+      updateTranslations();
+    }
+
+    function changeTheme(theme) {
+      document.body.className = `bg-[var(--background)] text-[var(--foreground)] min-h-screen font-sans transition-colors duration-200 theme-${theme}`;
+    }
+
+    function switchTab(tabId) {
+      document.getElementById("tab-face_id").classList.add("hidden");
+      document.getElementById("tab-dashboard_home").classList.add("hidden");
+      document.getElementById("tab-rooms").classList.add("hidden");
+      document.getElementById("tab-staff").classList.add("hidden");
+      document.getElementById("tab-settings").classList.add("hidden");
+
+      document.querySelectorAll("#sidebar-nav button").forEach(btn => {
+        btn.classList.remove("bg-[var(--background)]");
+      });
+
+      document.getElementById(`tab-${tabId}`).classList.remove("hidden");
+      document.getElementById(`nav-${tabId}`).classList.add("bg-[var(--background)]");
+    }
+
+    // Set clock
+    setInterval(() => {
+      document.getElementById("live-clock").innerText = new Date().toLocaleTimeString();
+    }, 1000);
+
+    // Initial setup
+    renderCameras();
+    renderScripts();
+    renderMappings();
+    renderVisitors();
+    renderRooms();
+    updateTranslations();
+
+  </script>
+</body>
+</html>
