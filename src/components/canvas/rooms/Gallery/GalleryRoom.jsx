@@ -705,6 +705,13 @@ const ProjectCard = memo(forwardRef(({ index, project, clothespinTexture, curren
     const [isAnimating, setIsAnimating] = useState(false);  // True ONLY during flip animation
     const [isScrolling, setIsScrolling] = useState(false);  // True during scroll phase
 
+    const titleFontSize = useMemo(() => {
+        if (!project.title) return 0.20;
+        const len = project.title.length;
+        if (len <= 10) return 0.20;
+        return Math.max(0.09, 0.20 * (10 / len));
+    }, [project.title]);
+
     // Random sway properties
     const swaySpeed = useRef(Math.random() * 0.2 + 0.3); // Slower sway speed
     const swayOffset = useRef(Math.random() * 100);
@@ -1258,10 +1265,17 @@ const ProjectCard = memo(forwardRef(({ index, project, clothespinTexture, curren
                     {/* Kontener na loga układane poziomo */}
                     <group position={[0, -0.05, 0.01]}>
                         {project.techStack && project.techStack.map((logoPath, idx) => {
-                            // Rozstawienie kwadracików (4 sztuki wyśrodkowane)
-                            const spacing = 0.30;
-                            const startX = -((project.techStack.length - 1) * spacing) / 2;
-                            const xPos = startX + (idx * spacing);
+                            // Fixed drawn box slots: Slot 1, Slot 2, Slot 3, Slot 4
+                            const slotPositions = [-0.45, -0.15, 0.15, 0.45];
+                            let slotIdx = idx;
+                            if (project.techStack.length === 3) {
+                                slotIdx = idx; // Occupy Slot 1, 2, 3
+                            } else if (project.techStack.length === 2) {
+                                slotIdx = idx + 1; // Center in Slot 2, 3
+                            } else if (project.techStack.length === 1) {
+                                slotIdx = 1; // Center in Slot 2
+                            }
+                            const xPos = slotPositions[slotIdx];
 
                             return (
                                 <TechStackLogo key={idx} path={logoPath} position={[xPos, 0, 0]} />
@@ -1286,7 +1300,7 @@ const ProjectCard = memo(forwardRef(({ index, project, clothespinTexture, curren
                 <Text
                     ref={textRef}
                     position={[0, 0.7, 0]} // Tylko dwa pierwsze parametry [X, Y] mają tutaj znaczenie
-                    fontSize={0.20}
+                    fontSize={titleFontSize}
                     color="#1c1c1c"
                     font="/fonts/CabinSketch-Bold.ttf"
                     anchorX="center"
