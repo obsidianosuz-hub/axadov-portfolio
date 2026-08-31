@@ -15,7 +15,7 @@ export const PROFILE_DATA = {
     
     // Social Links
     socials: {
-        telegram: "https://t.me/abdurasul7404",
+        telegram: "https://t.me/axadovcoder",
         instagram: "https://instagram.com/infasuz",
         gmail: "mailto:axadovabdurasul51@gmail.com",
         phone: "tel:+998501594232",
