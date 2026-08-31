@@ -61,11 +61,11 @@ export const PROFILE_DATA = {
     projects: [
         {
             id: 'project-1',
-            title: 'LOYIHA 1',
+            title: 'Telebar POS & Inventory',
             front: '/textures/gallery/monetuneprzod.webp', // Placeholder texture
             painted: '/textures/gallery/monetuneprzod_painted.webp',
-            url: '#',
-            description: 'Ushbu loyiha sizning birinchi loyiha namunangizdir. Uni src/config/profile.js faylidan osonlikcha o\'zgartirishingiz mumkin.',
+            url: '/telebar-demo.html',
+            description: 'Telefon do\'koni uchun sotuv (POS) va omborni boshqarish (Inventory) avtomatlashtirilgan tizimi. Shtrix-kodlarni skanerlash, qarzlar hisobi, xodimlar smenasi va filiallar analitikasini qo\'llab-quvvatlaydi.',
             techStack: ['/textures/gallery/reactlogo.webp', '/textures/gallery/jslogo.webp', '/textures/gallery/csslogo.webp']
         },
         {
