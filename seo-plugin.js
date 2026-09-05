@@ -1,12 +1,3 @@
-import { createClient } from '@sanity/client';
-
-const sanityClient = createClient({
-    projectId: 'kv5wjjmj',
-    dataset: 'production',
-    useCdn: true,
-    apiVersion: '2024-03-01',
-});
-
 // Tech stack filename -> human-readable name mapping for JSON-LD
 const TECH_STACK_NAMES = {
     'reactlogo.webp': 'React',
@@ -21,24 +12,51 @@ const TECH_STACK_NAMES = {
     'phplogo.webp': 'PHP',
 };
 
-/**
- * Helper to ensure dates are in ISO-8601 format with timezone for SEO.
- */
-function formatIsoDate(dateString) {
-    if (!dateString) return undefined;
-    if (dateString.includes('T')) return dateString; // Already has time/timezone
-    return `${dateString}T12:00:00Z`; // Default to noon UTC
-}
+const AXADOV_PROJECTS = [
+    {
+        title: "TeleBar - Telefon do'koni avtomatlashtirish tizimi",
+        seoTitle: "TeleBar - Phone Store POS & Inventory Management System",
+        description: "Mobil telefon do'konlari uchun to'liq avtomatlashtirilgan boshqaruv, kassa, ombor va savdo tizimi.",
+        seoDescription: "Complete POS, IMEI tracking, and inventory management system for mobile phone retailers.",
+        url: "https://axadov-portfolio.vercel.app/telebar-demo.html",
+        techStack: ['reactlogo.webp', 'jslogo.webp', 'tailwindlogo.webp']
+    },
+    {
+        title: "Sauna & Hammom boshqaruv tizimi",
+        seoTitle: "Sauna & Bath Complex Management System",
+        description: "Dam olish maskanlari va sauna majmualari uchun xonalar bandligi, vaqt hisobi va billing dasturi.",
+        seoDescription: "Comprehensive booking, billing, and room management system for sauna and bath wellness complexes.",
+        url: "https://axadov-portfolio.vercel.app/sauna-demo.html",
+        techStack: ['reactlogo.webp', 'jslogo.webp', 'tailwindlogo.webp']
+    },
+    {
+        title: "Creative 3D Portfolio",
+        seoTitle: "Axadov Abdurasul Creative 3D Portfolio",
+        description: "Interaktiv 3D yo'lak, WebGL va Three.js texnologiyalari asosidagi shaxsiy portfolio.",
+        seoDescription: "Interactive 3D WebGL corridor portfolio showcasing modern frontend and backend development.",
+        url: "https://axadov-portfolio.vercel.app/",
+        techStack: ['reactlogo.webp', 'jslogo.webp', 'csslogo.webp']
+    }
+];
 
-/**
- * Build dynamic JSON-LD structured data from Sanity content.
- * This generates schema.org entities that AI search engines (Google AI Overviews,
- * Perplexity, Gemini) use to understand and cite content in their answers.
- */
-function buildJsonLd(globalInfo, projects, studio, awards, faqList) {
+const AXADOV_FAQS = [
+    {
+        question: "Axadov Abdurasul kim?",
+        answer: "Axadov Abdurasul — zamonaviy web-ilovalar, biznes boshqaruv tizimlari (ERP, POS) va interaktiv 3D WebGL tajribalari yaratishga ixtisoslashgan Senior Frontend va Backend dasturchi."
+    },
+    {
+        question: "Qanday texnologiyalardan foydalaniladi?",
+        answer: "Asosiy stack: React, Next.js, Node.js, Express, JavaScript, TypeScript, Three.js, React Three Fiber, GSAP, Tailwind CSS, PostgreSQL, MongoDB."
+    },
+    {
+        question: "Loyihalar buyurtma berish uchun qanday bog'lanish mumkin?",
+        answer: "Telegram orqali @axadovcoder profiliga yoki Instagram orqali @infasuz ga yozishingiz mumkin."
+    }
+];
+
+function buildJsonLd() {
     const graph = [];
 
-    // --- 1. Person: Central node of the Knowledge Graph ---
     const person = {
         '@type': 'Person',
         '@id': 'https://axadov-portfolio.vercel.app/#person',
@@ -56,7 +74,6 @@ function buildJsonLd(globalInfo, projects, studio, awards, faqList) {
     };
     graph.push(person);
 
-    // --- 2. WebSite ---
     const website = {
         '@type': 'WebSite',
         '@id': 'https://axadov-portfolio.vercel.app/#website',
@@ -67,7 +84,6 @@ function buildJsonLd(globalInfo, projects, studio, awards, faqList) {
     };
     graph.push(website);
 
-    // --- 3. ProfilePage ---
     const profilePage = {
         '@type': 'ProfilePage',
         '@id': 'https://axadov-portfolio.vercel.app/#profilepage',
@@ -77,167 +93,56 @@ function buildJsonLd(globalInfo, projects, studio, awards, faqList) {
     };
     graph.push(profilePage);
 
-    // --- 4. FAQPage (GEO & AI search engine optimizer) ---
-    if (faqList && faqList.length > 0) {
-        const faqPage = {
-            '@type': 'FAQPage',
-            '@id': 'https://axadov-portfolio.vercel.app/#faq',
-            mainEntity: faqList.map(item => ({
-                '@type': 'Question',
-                name: item.question,
-                acceptedAnswer: {
-                    '@type': 'Answer',
-                    text: item.answer
-                }
-            }))
-        };
-        graph.push(faqPage);
-    }
+    const faqPage = {
+        '@type': 'FAQPage',
+        '@id': 'https://axadov-portfolio.vercel.app/#faq',
+        mainEntity: AXADOV_FAQS.map(item => ({
+            '@type': 'Question',
+            name: item.question,
+            acceptedAnswer: {
+                '@type': 'Answer',
+                text: item.answer
+            }
+        }))
+    };
+    graph.push(faqPage);
 
-    // --- 5. ItemList: Portfolio Projects (Google rich results for lists) ---
-    if (projects && projects.length > 0) {
-        graph.push({
-            '@type': 'ItemList',
-            '@id': 'https://axadov-portfolio.vercel.app/#projectslist',
-            name: 'Portfolio Projects by Axadov Abdurasul (axadov)',
-            description: 'Selected web development projects showcasing React, Node.js, Three.js, and creative frontend engineering.',
-            numberOfItems: projects.length,
-            itemListElement: projects.map((p, i) => ({
-                '@type': 'ListItem',
-                position: i + 1,
-                item: {
-                    '@type': 'CreativeWork',
-                    name: p.seoTitle || p.title,
-                    description: p.seoDescription || p.description || '',
-                    url: p.url || undefined,
-                    creator: { '@id': 'https://axadov-portfolio.vercel.app/#person' },
-                    ...(p.techStack && p.techStack.length > 0 ? {
-                        keywords: p.techStack.map(t => TECH_STACK_NAMES[t] || t).join(', ')
-                    } : {}),
-                }
-            }))
-        });
-
-        // Individual CreativeWork entries for each project (richer detail)
-        projects.forEach(p => {
-            const projectSlug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-            graph.push({
+    graph.push({
+        '@type': 'ItemList',
+        '@id': 'https://axadov-portfolio.vercel.app/#projectslist',
+        name: 'Portfolio Projects by Axadov Abdurasul (axadov)',
+        description: 'Selected web development projects showcasing React, Node.js, Three.js, and creative frontend engineering.',
+        numberOfItems: AXADOV_PROJECTS.length,
+        itemListElement: AXADOV_PROJECTS.map((p, i) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            item: {
                 '@type': 'CreativeWork',
-                '@id': `https://axadov-portfolio.vercel.app/#project-${projectSlug}`,
                 name: p.seoTitle || p.title,
                 description: p.seoDescription || p.description || '',
                 url: p.url || undefined,
                 creator: { '@id': 'https://axadov-portfolio.vercel.app/#person' },
                 ...(p.techStack && p.techStack.length > 0 ? {
                     keywords: p.techStack.map(t => TECH_STACK_NAMES[t] || t).join(', ')
-                } : {}),
-            });
-        });
-    }
-
-    // --- 6. Studio Content (YouTube -> VideoObject, Blog -> Article, TikTok -> VideoObject) ---
-    if (studio && studio.length > 0) {
-        studio.forEach((s, idx) => {
-            const studioSlug = `studio-item-${idx}`;
-            if (s.platform === 'youtube') {
-                let embedUrl = undefined;
-                if (s.url) {
-                    const ytMatch = s.url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^"&?\/\s]{11})/);
-                    if (ytMatch && ytMatch[1]) {
-                        embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}`;
-                    }
-                }
-
-                graph.push({
-                    '@type': 'VideoObject',
-                    '@id': `https://axadov-portfolio.vercel.app/#${studioSlug}`,
-                    name: s.seoTitle || s.title,
-                    description: s.seoDescription || s.description || '',
-                    url: s.url || undefined,
-                    contentUrl: s.url || undefined,
-                    ...(embedUrl ? { embedUrl } : {}),
-                    thumbnailUrl: s.thumbnailUrl || 'https://axadov-portfolio.vercel.app/og-image.webp',
-                    ...(s.duration ? { duration: `PT${s.duration.replace(':', 'M')}S` } : {}),
-                    ...(s.date ? { uploadDate: formatIsoDate(s.date) } : {}),
-                    ...(s.views ? { interactionStatistic: { '@type': 'InteractionCounter', interactionType: 'https://schema.org/WatchAction', userInteractionCount: s.views } } : {}),
-                    author: { '@id': 'https://axadov-portfolio.vercel.app/#person' },
-                });
-            } else if (s.platform === 'blog') {
-                graph.push({
-                    '@type': 'Article',
-                    '@id': `https://axadov-portfolio.vercel.app/#${studioSlug}`,
-                    headline: s.seoTitle || s.title,
-                    description: s.seoDescription || s.description || '',
-                    url: s.url || undefined,
-                    image: s.thumbnailUrl || 'https://axadov-portfolio.vercel.app/og-image.webp',
-                    ...(s.date ? { datePublished: formatIsoDate(s.date) } : {}),
-                    ...(s.readTime ? { timeRequired: `PT${s.readTime.replace(' min', '')}M` } : {}),
-                    author: { '@id': 'https://axadov-portfolio.vercel.app/#person' },
-                });
-            } else if (s.platform === 'tiktok') {
-                graph.push({
-                    '@type': 'VideoObject',
-                    '@id': `https://axadov-portfolio.vercel.app/#${studioSlug}`,
-                    name: s.seoTitle || s.title,
-                    description: s.seoDescription || s.description || '',
-                    url: s.url || undefined,
-                    contentUrl: s.url || undefined,
-                    thumbnailUrl: s.thumbnailUrl || 'https://axadov-portfolio.vercel.app/og-image.webp',
-                    ...(s.date ? { uploadDate: formatIsoDate(s.date) } : {}),
-                    ...(s.views ? { interactionStatistic: { '@type': 'InteractionCounter', interactionType: 'https://schema.org/WatchAction', userInteractionCount: s.views } } : {}),
-                    ...(s.likes ? { aggregateRating: { '@type': 'AggregateRating', ratingCount: s.likes } } : {}),
-                    author: { '@id': 'https://axadov-portfolio.vercel.app/#person' },
-                });
-            } else if (s.platform === 'instagram' || s.platform === 'x' || s.platform === 'linkedin') {
-                graph.push({
-                    '@type': 'SocialMediaPosting',
-                    '@id': `https://axadov-portfolio.vercel.app/#${studioSlug}`,
-                    headline: s.seoTitle || s.title,
-                    description: s.seoDescription || s.description || '',
-                    url: s.url || undefined,
-                    image: s.thumbnailUrl || 'https://axadov-portfolio.vercel.app/og-image.webp',
-                    ...(s.date ? { datePublished: formatIsoDate(s.date) } : {}),
-                    ...(s.likes ? { interactionStatistic: { '@type': 'InteractionCounter', interactionType: 'https://schema.org/LikeAction', userInteractionCount: s.likes } } : {}),
-                    author: { '@id': 'https://axadov-portfolio.vercel.app/#person' },
-                });
-            } else if (s.platform === 'codrops') {
-                graph.push({
-                    '@type': 'Article',
-                    '@id': `https://axadov-portfolio.vercel.app/#${studioSlug}`,
-                    headline: s.seoTitle || s.title,
-                    description: s.seoDescription || s.description || '',
-                    url: s.url || undefined,
-                    image: s.thumbnailUrl || 'https://axadov-portfolio.vercel.app/og-image.webp',
-                    ...(s.date ? { datePublished: formatIsoDate(s.date) } : {}),
-                    author: { '@id': 'https://axadov-portfolio.vercel.app/#person' },
-                });
+                } : {})
             }
-        });
-    }
+        }))
+    });
 
-    // --- 7. Awards as schema.org Award/CreativeWork ---
-    if (awards && awards.length > 0) {
-        const categoryLabels = { sotd: 'Site of the Day', sotm: 'Site of the Month', other: 'Honorable Mention' };
+    AXADOV_PROJECTS.forEach(p => {
+        const projectSlug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
         graph.push({
-            '@type': 'ItemList',
-            '@id': 'https://axadov-portfolio.vercel.app/#awardslist',
-            name: 'Awards & Achievements - Axadov Abdurasul',
-            numberOfItems: awards.length,
-            itemListElement: awards.map((a, i) => ({
-                '@type': 'ListItem',
-                position: i + 1,
-                item: {
-                    '@type': 'CreativeWork',
-                    name: `${categoryLabels[a.category] || a.category} — ${a.seoTitle || a.title}`,
-                    ...(a.date ? { dateCreated: formatIsoDate(a.date) } : {}),
-                    url: a.url || undefined,
-                    description: a.seoDescription || undefined,
-                    award: categoryLabels[a.category] || a.category,
-                    creator: { '@id': 'https://axadov-portfolio.vercel.app/#person' },
-                }
-            }))
+            '@type': 'CreativeWork',
+            '@id': `https://axadov-portfolio.vercel.app/#project-${projectSlug}`,
+            name: p.seoTitle || p.title,
+            description: p.seoDescription || p.description || '',
+            url: p.url || undefined,
+            creator: { '@id': 'https://axadov-portfolio.vercel.app/#person' },
+            ...(p.techStack && p.techStack.length > 0 ? {
+                keywords: p.techStack.map(t => TECH_STACK_NAMES[t] || t).join(', ')
+            } : {})
         });
-    }
+    });
 
     return {
         '@context': 'https://schema.org',
@@ -245,184 +150,75 @@ function buildJsonLd(globalInfo, projects, studio, awards, faqList) {
     };
 }
 
-// Helper to generate the llms.txt content in clean Markdown
-function buildLlmsTxt(globalInfo, projects, studio, awards, faqList) {
+function buildLlmsTxt() {
     const siteTitle = 'Axadov Abdurasul (axadov) | Creative 3D Portfolio';
     const siteDescription = 'Senior frontend & backend developer portfolio by Axadov Abdurasul (axadov). Explore interactive 3D WebGL scenes, React, Node.js and creative coding.';
     const aboutMe = 'Senior frontend & backend developer with expertise in building interactive 3D web applications, POS & inventory management platforms, full-stack systems, React and Node.js solutions.';
 
     let content = `# ${siteTitle}\n`;
     content += `> ${siteDescription}\n\n`;
-
     content += `## Biography / About Me\n`;
     content += `${aboutMe}\n\n`;
-
     content += `## Core Technologies & Skills\n`;
-    content += `- React, Three.js, React Three Fiber (R3F), GSAP (GreenSock), JavaScript, TypeScript, Next.js, WebGL, 3D Graphics, Web Development.\n\n`;
-
-    if (projects && projects.length > 0) {
-        content += `## Selected Portfolio Projects\n`;
-        projects.forEach(p => {
-            const tech = p.techStack ? ` (Tech: ${p.techStack.map(t => TECH_STACK_NAMES[t] || t).join(', ')})` : '';
-            content += `- [${p.seoTitle || p.title}](${p.url || 'https://axadov-portfolio.vercel.app'}): ${p.seoDescription || p.description || ''}${tech}\n`;
-        });
-        content += `\n`;
-    }
-
-    if (studio && studio.length > 0) {
-        content += `## Studio Content & Publications\n`;
-        studio.forEach(s => {
-            content += `- [${s.seoTitle || s.title} (${s.platform})](${s.url || 'https://axadov-portfolio.vercel.app'}): ${s.seoDescription || s.description || ''}\n`;
-        });
-        content += `\n`;
-    }
-
-    if (awards && awards.length > 0) {
-        content += `## Design Awards & Achievements\n`;
-        const categoryLabels = { sotd: 'Site of the Day', sotm: 'Site of the Month', other: 'Honorable Mention' };
-        awards.forEach(a => {
-            const category = categoryLabels[a.category] || a.category;
-            content += `- **${category}** — [${a.seoTitle || a.title}](${a.url || 'https://axadov-portfolio.vercel.app'}): Awarded on ${a.date || 'unknown'}. ${a.seoDescription || ''}\n`;
-        });
-        content += `\n`;
-    }
-
-    if (faqList && faqList.length > 0) {
-        content += `## Frequently Asked Questions (FAQ)\n`;
-        faqList.forEach(item => {
-            content += `- **${item.question}**\n`;
-            content += `  ${item.answer.replace(/\n/g, '\n  ')}\n`;
-        });
-    }
+    content += `- React, Three.js, React Three Fiber (R3F), GSAP (GreenSock), JavaScript, TypeScript, Next.js, Node.js, WebGL, 3D Graphics, Web Development.\n\n`;
+    content += `## Selected Portfolio Projects\n`;
+    AXADOV_PROJECTS.forEach(p => {
+        const tech = p.techStack ? ` (Tech: ${p.techStack.map(t => TECH_STACK_NAMES[t] || t).join(', ')})` : '';
+        content += `- [${p.seoTitle || p.title}](${p.url || 'https://axadov-portfolio.vercel.app'}): ${p.seoDescription || p.description || ''}${tech}\n`;
+    });
+    content += `\n## Frequently Asked Questions (FAQ)\n`;
+    AXADOV_FAQS.forEach(item => {
+        content += `- **${item.question}**\n  ${item.answer.replace(/\n/g, '\n  ')}\n`;
+    });
 
     return content;
 }
 
 export function generateSeoHtml() {
-    let cachedLlmsContent = '';
-
-    async function getLlmsContent() {
-        if (!cachedLlmsContent) {
-            try {
-                const [globalInfo, projects, studio, awards, faqList] = await Promise.all([
-                    sanityClient.fetch(`*[_id == "globalInfo"][0]`),
-                    sanityClient.fetch(`*[_type == "galleryProject"]`),
-                    sanityClient.fetch(`*[_type == "studioItem"]`),
-                    sanityClient.fetch(`*[_type == "awardCertificate"]`),
-                    sanityClient.fetch(`*[_type == "faq"]`)
-                ]);
-                cachedLlmsContent = buildLlmsTxt(globalInfo, projects, studio, awards, faqList);
-            } catch (e) {
-                console.error('SEO Plugin Error: Failed to fetch Sanity data for llms.txt', e);
-                cachedLlmsContent = `# Axadov Abdurasul\n> Senior Frontend & Backend Developer\n`;
-            }
-        }
-        return cachedLlmsContent;
-    }
+    const cachedLlmsContent = buildLlmsTxt();
 
     return {
         name: 'sanity-seo-plugin',
 
-        // Serve llms.txt in local development mode
         configureServer(server) {
-            server.middlewares.use(async (req, res, next) => {
+            server.middlewares.use((req, res, next) => {
                 if (req.url === '/llms.txt') {
-                    const content = await getLlmsContent();
                     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-                    res.end(content);
+                    res.end(cachedLlmsContent);
                 } else {
                     next();
                 }
             });
         },
 
-        // This hook runs when Vite generates or serves index.html
         async transformIndexHtml(html) {
             try {
-                // Fetch all data in parallel
-                const [globalInfo, projects, studio, awards, faqList] = await Promise.all([
-                    sanityClient.fetch(`*[_id == "globalInfo"][0]`),
-                    sanityClient.fetch(`*[_type == "galleryProject"]`),
-                    sanityClient.fetch(`*[_type == "studioItem"] { ..., "thumbnailUrl": frontTexture.asset->url }`),
-                    sanityClient.fetch(`*[_type == "awardCertificate"]`),
-                    sanityClient.fetch(`*[_type == "faq"]`)
-                ]);
-
-                // Site metadata for Axadov Abdurasul
                 const siteTitle = 'Axadov Abdurasul (axadov) | Creative 3D Portfolio';
                 const siteDescription = 'Senior frontend & backend developer portfolio by Axadov Abdurasul (axadov). Explore interactive 3D WebGL scenes, React, Node.js and creative coding.';
                 const aboutMe = 'Senior frontend & backend developer with expertise in building interactive 3D web applications, POS & inventory management platforms, full-stack systems, React and Node.js solutions.';
 
-                // Cache llms.txt content for later bundle emission
-                cachedLlmsContent = buildLlmsTxt(globalInfo, projects, studio, awards, faqList);
-
-                // ====== PART 1: Build the semantic HTML string ======
                 let seoHtml = `\n<div id="seo-content" class="sr-only-seo">\n`;
-                
-                seoHtml += `  <header>\n`;
-                seoHtml += `    <h1>${siteTitle}</h1>\n`;
-                seoHtml += `    <p>${siteDescription}</p>\n`;
-                seoHtml += `  </header>\n`;
+                seoHtml += `  <header>\n    <h1>${siteTitle}</h1>\n    <p>${siteDescription}</p>\n  </header>\n`;
+                seoHtml += `  <section id="about">\n    <h2>About Me</h2>\n    <p>${aboutMe}</p>\n    <a href="https://github.com/obsidianosuz-hub">GitHub</a>\n    <a href="https://t.me/axadovcoder">Telegram</a>\n    <a href="https://instagram.com/infasuz">Instagram</a>\n  </section>\n`;
+                seoHtml += `  <section id="projects">\n    <h2>Projects</h2>\n    <ul>\n`;
+                AXADOV_PROJECTS.forEach(p => {
+                    seoHtml += `      <li>\n        <h3>${p.seoTitle || p.title}</h3>\n        <p>${p.seoDescription || p.description || ''}</p>\n        ${p.url ? `<a href="${p.url}">Visit ${p.seoTitle || p.title}</a>\n` : ''}      </li>\n`;
+                });
+                seoHtml += `    </ul>\n  </section>\n`;
+                seoHtml += `  <section id="faq">\n    <h2>Frequently Asked Questions (FAQ)</h2>\n`;
+                AXADOV_FAQS.forEach(item => {
+                    seoHtml += `    <article>\n      <h3>${item.question}</h3>\n      <p>${item.answer}</p>\n    </article>\n`;
+                });
+                seoHtml += `  </section>\n</div>\n`;
 
-                seoHtml += `  <section id="about">\n`;
-                seoHtml += `    <h2>About Me</h2>\n`;
-                seoHtml += `    <p>${aboutMe}</p>\n`;
-                seoHtml += `    <a href="https://github.com/obsidianosuz-hub">GitHub</a>\n`;
-                seoHtml += `    <a href="https://t.me/axadovcoder">Telegram</a>\n`;
-                seoHtml += `    <a href="https://instagram.com/infasuz">Instagram</a>\n`;
-                seoHtml += `  </section>\n`;
+                const jsonLdSchemas = buildJsonLd();
+                const jsonLdScript = `\n  <!-- Dynamic Structured Data (JSON-LD) -->\n  <script type="application/ld+json">\n${JSON.stringify(jsonLdSchemas, null, 2)}\n  </script>\n`;
 
-                if (projects && projects.length > 0) {
-                    seoHtml += `  <section id="projects">\n    <h2>Projects</h2>\n    <ul>\n`;
-                    projects.forEach(p => {
-                        seoHtml += `      <li>\n        <h3>${p.seoTitle || p.title}</h3>\n        <p>${p.seoDescription || p.description || ''}</p>\n        ${p.url ? `<a href="${p.url}">Visit ${p.seoTitle || p.title}</a>\n` : ''}      </li>\n`;
-                    });
-                    seoHtml += `    </ul>\n  </section>\n`;
-                }
-
-                if (studio && studio.length > 0) {
-                    seoHtml += `  <section id="studio">\n    <h2>The Studio (Content)</h2>\n    <ul>\n`;
-                    studio.forEach(s => {
-                        seoHtml += `      <li>\n        <h3>${s.seoTitle || s.title} (${s.platform})</h3>\n        <p>${s.seoDescription || s.description || ''}</p>\n        ${s.url ? `<a href="${s.url}">View Content</a>\n` : ''}      </li>\n`;
-                    });
-                    seoHtml += `    </ul>\n  </section>\n`;
-                }
-
-                if (awards && awards.length > 0) {
-                    seoHtml += `  <section id="awards">\n    <h2>Awards & Certificates</h2>\n    <ul>\n`;
-                    awards.forEach(a => {
-                        seoHtml += `      <li>\n        <h3>${a.seoTitle || a.title}</h3>\n        <p>${a.category} - ${a.date}</p>\n        <p>${a.seoDescription || ''}</p>\n        ${a.url ? `<a href="${a.url}">Link</a>\n` : ''}      </li>\n`;
-                    });
-                    seoHtml += `    </ul>\n  </section>\n`;
-                }
-
-                // FAQ Section (GEO/AI search optimizer fallback)
-                if (faqList && faqList.length > 0) {
-                    seoHtml += `  <section id="faq">\n`;
-                    seoHtml += `    <h2>Frequently Asked Questions (FAQ)</h2>\n`;
-                    faqList.forEach(item => {
-                        seoHtml += `    <article>\n`;
-                        seoHtml += `      <h3>${item.question}</h3>\n`;
-                        seoHtml += `      <p>${item.answer}</p>\n`;
-                        seoHtml += `    </article>\n`;
-                    });
-                    seoHtml += `  </section>\n`;
-                }
-
-                seoHtml += `</div>\n`;
-
-                // ====== PART 2: Build dynamic JSON-LD ======
-                const jsonLdSchemas = buildJsonLd(globalInfo, projects, studio, awards, faqList);
-                const jsonLdScript = `\n  <!-- Dynamic Structured Data (JSON-LD) — generated from Sanity at build time -->\n  <script type="application/ld+json">\n${JSON.stringify(jsonLdSchemas, null, 2)}\n  </script>\n`;
-
-                // ====== PART 3: Transform HTML ======
-                // Update the <title> tag
                 let transformedHtml = html.replace(
                     /<title>(.*?)<\/title>/,
                     `<title>${siteTitle}</title>`
                 );
                 
-                // Add or replace meta description
                 if (transformedHtml.includes('<meta name="description"')) {
                     transformedHtml = transformedHtml.replace(
                         /<meta name="description" content="(.*?)"\s*\/?>/,
@@ -435,7 +231,6 @@ export function generateSeoHtml() {
                     );
                 }
 
-                // Update Open Graph dynamic metadata
                 transformedHtml = transformedHtml
                     .replace(
                         /<meta\s+property="og:title"\s+content="[^"]*"\s*\/?>/i,
@@ -444,9 +239,12 @@ export function generateSeoHtml() {
                     .replace(
                         /<meta\s+property="og:description"\s+content="[^"]*"\s*\/?>/i,
                         `<meta property="og:description" content="${siteDescription}" />`
+                    )
+                    .replace(
+                        /<meta\s+property="og:site_name"\s+content="[^"]*"\s*\/?>/i,
+                        `<meta property="og:site_name" content="Axadov Abdurasul Portfolio" />`
                     );
 
-                // Update Twitter card dynamic metadata
                 transformedHtml = transformedHtml
                     .replace(
                         /<meta\s+name="twitter:title"\s+content="[^"]*"\s*\/?>/i,
@@ -457,35 +255,29 @@ export function generateSeoHtml() {
                         `<meta name="twitter:description" content="${siteDescription}" />`
                     );
 
-                // Inject dynamic JSON-LD right before </head> (next to the existing static one)
                 transformedHtml = transformedHtml.replace('</head>', `${jsonLdScript}</head>`);
 
-                // Replace the static placeholder with the dynamic one to prevent duplicate #seo-content and double h1s
                 if (transformedHtml.includes('id="seo-content"')) {
                     transformedHtml = transformedHtml.replace(
                         /<div id="seo-content" class="sr-only-seo">[\s\S]*?<\/div>/,
                         seoHtml
                     );
                 } else {
-                    // Fallback injection if the template doesn't contain the static block
                     transformedHtml = transformedHtml.replace('</body>', `${seoHtml}</body>`);
                 }
 
                 return transformedHtml;
             } catch (error) {
-                console.error('SEO Plugin Error: Failed to fetch Sanity data', error);
-                // Return original HTML on failure so we don't break the build
+                console.error('SEO Plugin Error:', error);
                 return html;
             }
         },
 
-        // Emit llms.txt to the build output directory
         async generateBundle() {
-            const content = await getLlmsContent();
             this.emitFile({
                 type: 'asset',
                 fileName: 'llms.txt',
-                source: content
+                source: cachedLlmsContent
             });
         }
     };
