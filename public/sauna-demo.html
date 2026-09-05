@@ -2,392 +2,877 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
-  <title>Hamom & Sauna Avtomatlashtirish Tizimi Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAUNA.UZ — To'liq 1:1 Boshqaruv Tizimi Demo</title>
+  <!-- Tailwind CSS via Google static CDN -->
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
-    :root {
-      --background: #f4f4f5;
-      --card: #ffffff;
-      --border: #e4e4e7;
-      --foreground: #09090b;
-      --muted-foreground: #71717a;
-      --primary: #09090b;
-      --primary-foreground: #ffffff;
-      --accent: #6366f1;
-    }
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, h4, .font-heading { font-family: 'Outfit', 'Inter', sans-serif; }
     
+    :root {
+      --bg-page: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent-gold: #c5a059;
+      --sidebar-bg: #ffffff;
+      --primary-btn: #0f172a;
+      --primary-btn-text: #ffffff;
+    }
+
     .theme-dark {
-      --background: #09090b;
-      --card: #18181b;
-      --border: #27272a;
-      --foreground: #fafafa;
-      --muted-foreground: #a1a1aa;
-      --primary: #fafafa;
-      --primary-foreground: #09090b;
-      --accent: #818cf8;
+      --bg-page: #09090b;
+      --card-bg: #18181b;
+      --card-border: #27272a;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-gold: #fbbf24;
+      --sidebar-bg: #121215;
+      --primary-btn: #f8fafc;
+      --primary-btn-text: #09090b;
     }
 
     .theme-gold {
-      --background: #110d06;
-      --card: #1c160c;
-      --border: #352a16;
-      --foreground: #fcf8f2;
-      --muted-foreground: #b89c72;
-      --primary: #c5a059;
-      --primary-foreground: #110d06;
-      --accent: #c5a059;
+      --bg-page: #0f0d09;
+      --card-bg: #1a1711;
+      --card-border: #332a1c;
+      --text-main: #fbf7ee;
+      --text-muted: #bda889;
+      --accent-gold: #d4af37;
+      --sidebar-bg: #14110b;
+      --primary-btn: #d4af37;
+      --primary-btn-text: #0f0d09;
     }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+    .theme-dark ::-webkit-scrollbar-thumb, .theme-gold ::-webkit-scrollbar-thumb { background: #3f3f46; }
+
+    .toast-enter { transform: translateY(-20px); opacity: 0; }
+    .toast-active { transform: translateY(0); opacity: 1; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
   </style>
 </head>
-<body class="bg-[var(--background)] text-[var(--foreground)] min-h-screen font-sans transition-colors duration-200">
-  
-  <div class="flex min-h-screen">
-    
-    <!-- SIDEBAR -->
-    <aside class="w-64 bg-[var(--card)] border-r border-[var(--border)] p-6 flex flex-col justify-between">
+<body class="bg-[var(--bg-page)] text-[var(--text-main)] min-h-screen transition-colors duration-200 antialiased selection:bg-[#c5a059] selection:text-white">
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-box" class="fixed top-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- APP WRAPPER -->
+  <div class="min-h-screen flex">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="w-64 bg-[var(--sidebar-bg)] border-r border-[var(--card-border)] flex flex-col justify-between p-5 shrink-0 select-none">
       <div class="space-y-6">
+        
         <!-- Logo -->
-        <div class="flex items-center space-x-2">
-          <div class="w-8 h-8 rounded-lg bg-[var(--primary)] flex items-center justify-center text-[var(--primary-foreground)] font-bold text-lg">S</div>
-          <span class="font-bold tracking-tight text-lg">SAUNA.UZ</span>
+        <div class="flex items-center space-x-3 px-2">
+          <div class="w-10 h-10 rounded-xl bg-black border-2 border-[#c5a059] flex items-center justify-center text-[#c5a059] font-black text-xl shadow-md">S</div>
+          <div>
+            <h1 class="font-bold text-base leading-none tracking-tight text-[var(--text-main)]">SAUNA.UZ</h1>
+            <span class="text-[9px] font-extrabold text-[#c5a059] uppercase tracking-widest">1:1 Demo Tizimi</span>
+          </div>
         </div>
 
-        <!-- Navigation Menu -->
-        <nav class="space-y-1.5" id="sidebar-nav">
-          <button onclick="switchTab('dashboard_home')" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-left text-xs font-bold transition hover:bg-[var(--background)]" id="nav-dashboard_home">
-            <span>🏠</span> <span data-i18n="nav_dashboard_home">Kunlik Statistika</span>
+        <!-- Role Selector Switcher for Live Demo Experience -->
+        <div class="bg-[var(--bg-page)] border border-[var(--card-border)] p-3 rounded-2xl space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Aktiv Rol (Demo):</span>
+            <span id="role-badge" class="px-1.5 py-0.5 rounded text-[8px] font-black uppercase bg-emerald-100 text-emerald-800">SUPER ADMIN</span>
+          </div>
+          <select id="role-switcher" onchange="switchRole(this.value)" class="w-full bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-main)] text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#c5a059] font-semibold cursor-pointer">
+            <option value="super_admin">👑 Super Admin</option>
+            <option value="manager">💼 Menejer (Operator)</option>
+            <option value="cashier">💳 Kassir (Qabulxona)</option>
+            <option value="barman">🍹 Barman (Kafe)</option>
+          </select>
+        </div>
+
+        <!-- Navigation Menus -->
+        <nav class="space-y-1 text-xs" id="nav-container">
+          
+          <!-- Boshqaruv Paneli Dropdown -->
+          <div>
+            <button onclick="toggleMenu('dashboard')" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-page)] transition-all">
+              <div class="flex items-center space-x-2.5">
+                <span>📊</span>
+                <span data-i18n="nav_dashboard">Boshqaruv Paneli</span>
+              </div>
+              <span id="arrow-dashboard" class="text-[8px] transition-transform duration-200">▼</span>
+            </button>
+            
+            <div id="sub-dashboard" class="pl-4 mt-1 space-y-1 border-l-2 border-[var(--card-border)] ml-4">
+              <button onclick="navigateTab('dashboard_home')" id="btn-dashboard_home" class="nav-btn w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-page)] transition">
+                <span>🏠</span>
+                <span data-i18n="nav_dashboard_home">Kunlik Statistika</span>
+              </button>
+              
+              <!-- Rooms Dropdown -->
+              <div>
+                <button onclick="toggleMenu('rooms')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-page)] transition">
+                  <div class="flex items-center space-x-2.5">
+                    <span>🛁</span>
+                    <span data-i18n="nav_rooms">Xonalar holati</span>
+                  </div>
+                  <span id="arrow-rooms" class="text-[7px] transition-transform">▶</span>
+                </button>
+                <div id="sub-rooms" class="hidden pl-4 mt-1 space-y-1">
+                  <button onclick="navigateTab('rooms_hammom')" id="btn-rooms_hammom" class="nav-btn w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-[var(--text-muted)] hover:text-[var(--text-main)]">
+                    <span>🛁</span> <span>Hammom</span>
+                  </button>
+                  <button onclick="navigateTab('rooms_sauna')" id="btn-rooms_sauna" class="nav-btn w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-[var(--text-muted)] hover:text-[var(--text-main)]">
+                    <span>🔥</span> <span>Sauna</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Staff Dropdown -->
+              <div id="nav-staff-wrapper">
+                <button onclick="toggleMenu('staff')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-page)] transition">
+                  <div class="flex items-center space-x-2.5">
+                    <span>👤</span>
+                    <span data-i18n="nav_staff">Xodimlar & Davomat</span>
+                  </div>
+                  <span id="arrow-staff" class="text-[7px] transition-transform">▶</span>
+                </button>
+                <div id="sub-staff" class="hidden pl-4 mt-1 space-y-1">
+                  <button onclick="navigateTab('staff')" id="btn-staff" class="nav-btn w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-[var(--text-muted)] hover:text-[var(--text-main)]">
+                    <span>👥</span> <span>Xodimlar Ro'yxati</span>
+                  </button>
+                  <button onclick="navigateTab('face_id')" id="btn-face_id" class="nav-btn w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-[var(--text-muted)] hover:text-[var(--text-main)]">
+                    <span>📹</span> <span>Face ID Nazorati</span>
+                  </button>
+                </div>
+              </div>
+
+              <button onclick="navigateTab('customers')" id="btn-customers" class="nav-btn w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-page)] transition">
+                <span>👥</span>
+                <span data-i18n="nav_customers">Mijozlar</span>
+              </button>
+
+              <button onclick="navigateTab('finance')" id="btn-finance" class="nav-btn w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-page)] transition">
+                <span>💼</span>
+                <span data-i18n="nav_finance">Moliya & Kassa</span>
+              </button>
+
+              <button onclick="navigateTab('partners')" id="btn-partners" class="nav-btn w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-page)] transition">
+                <span>🤝</span>
+                <span data-i18n="nav_partners">Hamkorlar</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Warehouse Dropdown -->
+          <div id="nav-warehouse-wrapper">
+            <button onclick="toggleMenu('warehouse')" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-page)] transition-all">
+              <div class="flex items-center space-x-2.5">
+                <span>📦</span>
+                <span data-i18n="nav_warehouse">Omborxona</span>
+              </div>
+              <span id="arrow-warehouse" class="text-[8px] transition-transform duration-200">▶</span>
+            </button>
+            <div id="sub-warehouse" class="hidden pl-4 mt-1 space-y-1 border-l-2 border-[var(--card-border)] ml-4">
+              <button onclick="navigateTab('warehouse')" id="btn-warehouse" class="nav-btn w-full flex items-center space-x-2 px-3 py-2 rounded-lg font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)]">
+                <span>📋</span> <span>Ombor Qoldig'i</span>
+              </button>
+              <button onclick="navigateTab('warehouse_scan')" id="btn-warehouse_scan" class="nav-btn w-full flex items-center space-x-2 px-3 py-2 rounded-lg font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)]">
+                <span>🏷️</span> <span>Skaner Kiritish</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Sozlamalar -->
+          <button onclick="navigateTab('settings')" id="btn-settings" class="nav-btn w-full flex items-center space-x-2.5 px-3.5 py-2.5 rounded-xl font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-page)] transition">
+            <span>⚙️</span>
+            <span data-i18n="nav_settings">Sozlamalar</span>
           </button>
-          <button onclick="switchTab('rooms')" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-left text-xs font-bold transition hover:bg-[var(--background)]" id="nav-rooms">
-            <span>🛁</span> <span data-i18n="nav_rooms">Xonalar holati</span>
+
+          <!-- Audit Logs -->
+          <button onclick="navigateTab('audit_logs')" id="btn-audit_logs" class="nav-btn w-full flex items-center space-x-2.5 px-3.5 py-2.5 rounded-xl font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-page)] transition">
+            <span>📜</span>
+            <span data-i18n="nav_audit_logs">Oxirgi amallar</span>
           </button>
-          <button onclick="switchTab('staff')" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-left text-xs font-bold transition hover:bg-[var(--background)]" id="nav-staff">
-            <span>👤</span> <span data-i18n="nav_staff">Xodimlar & Davomat</span>
-          </button>
-          <button onclick="switchTab('face_id')" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-left text-xs font-bold transition bg-[var(--background)]" id="nav-face_id">
-            <span>📹</span> <span data-i18n="nav_face_id">Face ID Nazorati</span>
-          </button>
-          <button onclick="switchTab('settings')" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-left text-xs font-bold transition hover:bg-[var(--background)]" id="nav-settings">
-            <span>⚙️</span> <span data-i18n="nav_settings">Sozlamalar</span>
-          </button>
+
         </nav>
       </div>
 
-      <!-- User footer -->
-      <div class="bg-[var(--background)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
+      <!-- User footer profile box -->
+      <div class="bg-[var(--bg-page)] border border-[var(--card-border)] rounded-2xl p-3.5 space-y-3">
         <div class="flex items-center space-x-3">
-          <div class="w-9 h-9 rounded-full bg-[var(--primary)] flex items-center justify-center font-bold text-[var(--primary-foreground)] text-sm">A</div>
-          <div>
-            <h4 class="text-xs font-bold leading-tight">Abdurasul</h4>
-            <span class="text-[10px] text-[var(--muted-foreground)] uppercase">Super Admin</span>
+          <div class="w-9 h-9 rounded-xl bg-black text-[#c5a059] border border-[#c5a059]/40 flex items-center justify-center font-black text-sm shadow-sm" id="user-avatar">A</div>
+          <div class="flex-1 min-w-0">
+            <h4 class="text-xs font-bold truncate leading-tight" id="user-name">Abdurasul (Super Admin)</h4>
+            <span class="text-[9px] font-bold text-[#c5a059] uppercase tracking-wider" id="user-role-label">super_admin</span>
           </div>
         </div>
+        <button onclick="showToast('Tizimdan chiqish bosildi (Demo rejimida faol)', 'info')" class="w-full text-center text-[11px] font-bold py-1.5 bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-muted)] rounded-lg hover:text-[var(--text-main)] transition">
+          <span data-i18n="logout">Tizimdan chiqish</span>
+        </button>
       </div>
     </aside>
 
-    <!-- MAIN BODY -->
-    <main class="flex-1 p-8 flex flex-col justify-between space-y-8">
+    <!-- RIGHT MAIN CONTENT -->
+    <main class="flex-1 flex flex-col min-w-0 bg-[var(--bg-page)] overflow-y-auto">
       
       <!-- Topbar Header -->
-      <header class="flex justify-between items-center bg-[var(--card)] border border-[var(--border)] px-6 py-4 rounded-3xl shadow-sm">
-        <div class="flex items-center space-x-4">
-          <h2 class="text-base font-bold" data-i18n="dashboard_label">Boshqaruv Paneli</h2>
-          <div class="h-4 w-px bg-[var(--border)]"></div>
-          <span class="text-xs font-semibold text-[var(--muted-foreground)]" id="live-clock">12:38:27</span>
+      <header class="bg-[var(--card-bg)] border-b border-[var(--card-border)] px-8 py-3.5 flex justify-between items-center sticky top-0 z-30 shadow-xs">
+        <div class="flex items-center space-x-5">
+          <h2 class="text-sm font-bold text-[var(--text-main)] tracking-tight flex items-center space-x-2">
+            <span id="current-tab-icon">🏠</span>
+            <span id="current-tab-title">Kunlik Statistika</span>
+          </h2>
+          <div class="h-4 w-px bg-[var(--card-border)]"></div>
+          <div class="flex items-center space-x-2 text-xs font-semibold text-[var(--text-muted)]">
+            <span id="live-date">Seshanba, 5-Sentabr 2026</span>
+            <span>•</span>
+            <span id="live-clock" class="font-mono text-black dark:text-white font-bold">10:57:21</span>
+          </div>
+        </div>
+
+        <!-- Actions & Language & Theme -->
+        <div class="flex items-center space-x-3">
+          
+          <!-- RFID Simulation Button -->
+          <button onclick="triggerQuickRfid()" class="bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-[11px] font-bold px-3 py-1.5 rounded-xl transition flex items-center space-x-1.5 shadow-xs" title="RFID Karta tekkizishni simulyatsiya qilish">
+            <span>💳</span>
+            <span>RFID Simulyatsiya</span>
+          </button>
+
+          <!-- Language Selector -->
+          <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-[var(--bg-page)] border border-[var(--card-border)] text-[var(--text-main)] text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#c5a059] font-medium cursor-pointer">
+            <option value="uz">🇺🇿 O'zbekcha</option>
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="tr">🇹🇷 Türkçe</option>
+          </select>
+
+          <!-- Theme Selector -->
+          <select id="theme-select" onchange="changeTheme(this.value)" class="bg-[var(--bg-page)] border border-[var(--card-border)] text-[var(--text-main)] text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#c5a059] font-medium cursor-pointer">
+            <option value="light">☀️ Yorug'</option>
+            <option value="dark">🌙 Qorong'i</option>
+            <option value="gold">👑 Gold VIP</option>
+          </select>
         </div>
       </header>
 
-      <!-- TABS CONTAINER -->
-      <div id="tab-content" class="flex-1">
+      <!-- TAB CONTENTS -->
+      <div class="p-8 flex-1">
         
-        <!-- TAB: FACE ID & CAMERA CONTROL -->
-        <div id="tab-face_id" class="space-y-6">
-          
+        <!-- 1. TAB: DASHBOARD HOME -->
+        <div id="tab-dashboard_home" class="tab-pane space-y-6">
+          <!-- Top 4 Analytics Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-5 space-y-2 shadow-sm">
+              <div class="flex justify-between items-center text-[var(--text-muted)]">
+                <span class="text-xs font-bold uppercase tracking-wider">Bugungi Tushum</span>
+                <span class="p-2 rounded-xl bg-emerald-50 text-emerald-600 text-xs font-bold">💰</span>
+              </div>
+              <h3 class="text-2xl font-black text-emerald-600" id="stat-revenue">14,850,000 UZS</h3>
+              <p class="text-[11px] text-[var(--text-muted)] flex items-center space-x-1">
+                <span class="text-emerald-500 font-bold">↑ 18%</span>
+                <span>kechagiga nisbatan</span>
+              </p>
+            </div>
+
+            <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-5 space-y-2 shadow-sm">
+              <div class="flex justify-between items-center text-[var(--text-muted)]">
+                <span class="text-xs font-bold uppercase tracking-wider">Xonalar Bandligi</span>
+                <span class="p-2 rounded-xl bg-blue-50 text-blue-600 text-xs font-bold">🛁</span>
+              </div>
+              <h3 class="text-2xl font-black text-[var(--text-main)]" id="stat-occupancy">11 / 18 xona</h3>
+              <div class="w-full bg-[var(--bg-page)] rounded-full h-1.5 overflow-hidden">
+                <div class="bg-blue-600 h-1.5 rounded-full" style="width: 61%"></div>
+              </div>
+            </div>
+
+            <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-5 space-y-2 shadow-sm">
+              <div class="flex justify-between items-center text-[var(--text-muted)]">
+                <span class="text-xs font-bold uppercase tracking-wider">Bugungi Mehmonlar</span>
+                <span class="p-2 rounded-xl bg-amber-50 text-amber-600 text-xs font-bold">👥</span>
+              </div>
+              <h3 class="text-2xl font-black text-[var(--text-main)]" id="stat-visitors">64 nafar</h3>
+              <p class="text-[11px] text-[var(--text-muted)]">Face ID: 29 yangi yuz aniqlandi</p>
+            </div>
+
+            <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-5 space-y-2 shadow-sm">
+              <div class="flex justify-between items-center text-[var(--text-muted)]">
+                <span class="text-xs font-bold uppercase tracking-wider">Kassa Qoldig'i</span>
+                <span class="p-2 rounded-xl bg-purple-50 text-purple-600 text-xs font-bold">💼</span>
+              </div>
+              <h3 class="text-2xl font-black text-purple-600">38,200,000 UZS</h3>
+              <p class="text-[11px] text-[var(--text-muted)]">Naqd: 22M • Plastik: 16.2M</p>
+            </div>
+          </div>
+
+          <!-- Quick Actions & Active Rooms overview -->
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- 1. Active Camera Links Table -->
-            <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] shadow-sm rounded-3xl p-6 space-y-4 text-left">
-              <div>
-                <h4 class="text-sm font-bold" data-i18n="camera_tokens_title">Faol Kamera Aloqalari va Tokenlar</h4>
-                <p class="text-[11px] text-[var(--muted-foreground)]" data-i18n="camera_tokens_desc">Tizimga ulangan kameralar, ularning aloqa turi va tokenlari ro'yxati</p>
+            <!-- Left: Active Rooms Quick View -->
+            <div class="lg:col-span-2 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-6 space-y-4 shadow-sm">
+              <div class="flex justify-between items-center">
+                <div>
+                  <h4 class="text-sm font-bold text-[var(--text-main)]">Aktiv Seanslar va Xonalar</h4>
+                  <p class="text-[11px] text-[var(--text-muted)]">Hozirda band bo'lgan hammom va sauna xonalari taymeri</p>
+                </div>
+                <button onclick="navigateTab('rooms_hammom')" class="text-xs font-bold text-[#c5a059] hover:underline">Barchasini ko'rish →</button>
               </div>
 
-              <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-[11px]">
-                  <thead>
-                    <tr class="border-b border-[var(--border)] text-[var(--muted-foreground)] font-bold uppercase tracking-wider text-[8px] pb-2">
-                      <th class="pb-2" data-i18n="camera_name_label">Kamera Nomi</th>
-                      <th class="pb-2" data-i18n="connection_type_label">Aloqa Turi</th>
-                      <th class="pb-2" data-i18n="connection_address_label">Ulanish Manzili</th>
-                      <th class="pb-2" data-i18n="camera_permissions_label">Vazifasi</th>
-                      <th class="pb-2">API Token</th>
-                      <th class="pb-2 text-right" data-i18n="action">Amal</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-[var(--border)]" id="camera-tokens-tbody">
-                    <!-- Loaded dynamically -->
-                  </tbody>
-                </table>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="home-active-rooms">
+                <!-- Dynamically filled -->
               </div>
             </div>
 
-            <!-- 2. Camera Token Generator -->
-            <div class="bg-[var(--card)] border border-[var(--border)] shadow-sm rounded-3xl p-6 space-y-4 text-left">
-              <div>
-                <h4 class="text-xs font-bold uppercase tracking-wider" data-i18n="camera_generator_title">Kamera Token Generator</h4>
-                <p class="text-[10px] text-[var(--muted-foreground)]" data-i18n="camera_generator_desc">Har bir kamera uchun bitta alohida ulanish va API tokenini yaratish</p>
+            <!-- Right: Quick Action Controls -->
+            <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-6 space-y-4 shadow-sm">
+              <h4 class="text-sm font-bold text-[var(--text-main)]">Tezkor Operatsiyalar</h4>
+              <div class="space-y-2.5">
+                <button onclick="openBookingModal(1)" class="w-full bg-[var(--primary-btn)] text-[var(--primary-btn-text)] p-3 rounded-2xl text-xs font-bold hover:opacity-90 transition flex items-center justify-between">
+                  <span class="flex items-center space-x-2"><span>➕</span> <span>Yangi Mehmon Qabul Qilish</span></span>
+                  <span>→</span>
+                </button>
+                <button onclick="openFinanceModal('income')" class="w-full bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-2xl text-xs font-bold hover:bg-emerald-100 transition flex items-center justify-between">
+                  <span class="flex items-center space-x-2"><span>💵</span> <span>Kassaga Kirim Qilish</span></span>
+                  <span>→</span>
+                </button>
+                <button onclick="openFinanceModal('expense')" class="w-full bg-rose-50 border border-rose-200 text-rose-800 p-3 rounded-2xl text-xs font-bold hover:bg-rose-100 transition flex items-center justify-between">
+                  <span class="flex items-center space-x-2"><span>🧾</span> <span>Chiqim / Xarajat Yozish</span></span>
+                  <span>→</span>
+                </button>
+                <button onclick="navigateTab('warehouse_scan')" class="w-full bg-indigo-50 border border-indigo-200 text-indigo-800 p-3 rounded-2xl text-xs font-bold hover:bg-indigo-100 transition flex items-center justify-between">
+                  <span class="flex items-center space-x-2"><span>🏷️</span> <span>Shtrixkod Skanerini Ochish</span></span>
+                  <span>→</span>
+                </button>
               </div>
-
-              <form onsubmit="generateCamera(event)" class="space-y-3">
-                <div class="space-y-1">
-                  <label class="block text-[9px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="camera_name_label">Kamera Nomi</label>
-                  <input id="form-cam-name" type="text" required placeholder="Masalan: Kassa oldi kamerasi" class="w-full border border-[var(--border)] rounded-xl px-3 py-2 bg-[var(--background)] focus:outline-none font-semibold text-xs text-[var(--foreground)]">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="space-y-1">
-                    <label class="block text-[9px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="connection_type_label">Aloqa Turi</label>
-                    <select id="form-cam-type" class="w-full border border-[var(--border)] rounded-xl px-3 py-2 bg-[var(--card)] text-xs text-[var(--foreground)]">
-                      <option value="USB">USB veb-kamera</option>
-                      <option value="RTSP">RTSP tarmoq oqimi</option>
-                      <option value="WIRELESS">Simsiz / API (Token)</option>
-                    </select>
-                  </div>
-                  <div class="space-y-1">
-                    <label class="block text-[9px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="camera_permissions_label">Vazifasi</label>
-                    <select id="form-cam-perm" class="w-full border border-[var(--border)] rounded-xl px-3 py-2 bg-[var(--card)] text-xs text-[var(--foreground)]">
-                      <option value="full_access">To'liq (Kirish/Chiqish)</option>
-                      <option value="employee_efficiency">Samaradorlik (KPI/Davomat)</option>
-                      <option value="cashier_visitor_catcher">Kassa Oldi Visitor Catcher</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="space-y-1">
-                  <label class="block text-[9px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="connection_address_label">Ulanish Manzili</label>
-                  <input id="form-cam-address" type="text" required placeholder="COM3 yoki rtsp://..." class="w-full border border-[var(--border)] rounded-xl px-3 py-2 bg-[var(--background)] focus:outline-none font-semibold text-xs text-[var(--foreground)]">
-                </div>
-
-                <div class="space-y-1">
-                  <label class="block text-[9px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="select_script_label">Ssenariylar Kutubxonasidan Tanlash</label>
-                  <select id="form-cam-script-id" onchange="onFormScriptChange()" class="w-full border border-[var(--border)] rounded-xl px-3 py-2 bg-[var(--card)] text-xs text-[var(--foreground)]">
-                    <option value="">-- Kod tanlash --</option>
-                  </select>
-                </div>
-
-                <div class="space-y-1">
-                  <label class="block text-[9px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="camera_code_label">Ssenariy Kodi</label>
-                  <textarea id="form-cam-code" rows="3" class="w-full border border-[var(--border)] rounded-xl px-3 py-2 bg-[var(--background)] font-mono text-[9px] text-[var(--foreground)] focus:outline-none"></textarea>
-                </div>
-
-                <button type="submit" class="w-full bg-[var(--primary)] text-[var(--primary-foreground)] text-[10px] font-bold py-2.5 rounded-xl hover:opacity-90 active:scale-95 transition" data-i18n="token_create_btn">Token Yaratish va Ulash</button>
-              </form>
             </div>
-            
           </div>
+        </div>
 
-          <!-- SSENARIYLAR KUTUBXONASI VA INTEGRATSIYA BO'LIMI -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            
-            <!-- 1. Custom Scripts Database Library -->
-            <div class="bg-[var(--card)] border border-[var(--border)] shadow-sm rounded-3xl p-6 text-left space-y-4">
-              <div>
-                <h4 class="text-sm font-bold flex items-center">
-                  <span class="w-2.5 h-2.5 bg-indigo-500 rounded-full mr-2"></span>
-                  <span data-i18n="script_library_title">Ssenariy Kodlar Kutubxonasi</span>
-                </h4>
-                <p class="text-[11px] text-[var(--muted-foreground)]" data-i18n="script_library_desc">Kameralarga biriktirish uchun qayta ishlatiladigan ssenariylar bazasi</p>
-              </div>
-
-              <!-- List -->
-              <div class="overflow-y-auto max-h-48 border border-[var(--border)] rounded-xl p-1 bg-[var(--background)]">
-                <table class="w-full text-left border-collapse text-[10px]">
-                  <thead>
-                    <tr class="border-b border-[var(--border)] text-[var(--muted-foreground)] font-bold uppercase tracking-wider text-[7px] pb-1">
-                      <th class="pb-1" data-i18n="name">Nomi</th>
-                      <th class="pb-1" data-i18n="description">Tavsif</th>
-                      <th class="pb-1 text-right" data-i18n="action">Amal</th>
-                    </tr>
-                  </thead>
-                  <tbody id="scripts-tbody">
-                    <!-- Dynamic -->
-                  </tbody>
-                </table>
-              </div>
-
-              <!-- Form -->
-              <form onsubmit="addScript(event)" class="space-y-3 pt-3 border-t border-[var(--border)]">
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="space-y-1">
-                    <label class="block text-[8px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="script_name">Ssenariy Nomi</label>
-                    <input id="script-title" type="text" required placeholder="Masalan: Kassa Nazorati" class="w-full border border-[var(--border)] rounded-xl px-3 py-1.5 bg-[var(--card)] text-xs text-[var(--foreground)]">
-                  </div>
-                  <div class="space-y-1">
-                    <label class="block text-[8px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="description">Tavsif</label>
-                    <input id="script-desc" type="text" placeholder="Qisqacha maqsadi" class="w-full border border-[var(--border)] rounded-xl px-3 py-1.5 bg-[var(--card)] text-xs text-[var(--foreground)]">
-                  </div>
-                </div>
-                <div class="space-y-1">
-                  <label class="block text-[8px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="script_code">Ssenariy Kodi</label>
-                  <textarea id="script-code" required rows="2" class="w-full border border-[var(--border)] rounded-xl px-3 py-2 bg-[var(--background)] font-mono text-[9px] text-[var(--foreground)]"></textarea>
-                </div>
-                <button type="submit" class="w-full bg-[var(--primary)] text-[var(--primary-foreground)] text-[9px] font-bold py-2 rounded-xl" data-i18n="add_to_library">Kutubxonaga Qo'shish</button>
-              </form>
-            </div>
-
-            <!-- 2. Camera-to-Script Integration Panel -->
-            <div class="bg-[var(--card)] border border-[var(--border)] shadow-sm rounded-3xl p-6 text-left space-y-4 flex flex-col justify-between">
-              <div>
-                <h4 class="text-sm font-bold flex items-center">
-                  <span class="w-2.5 h-2.5 bg-violet-500 rounded-full mr-2"></span>
-                  <span data-i18n="camera_integration_title">Kamera va Kod Integratsiyasi</span>
-                </h4>
-                <p class="text-[11px] text-[var(--muted-foreground)]" data-i18n="camera_integration_desc">Tanlangan kamerani kutubxonadagi maxsus ssenariyga bog'lash</p>
-              </div>
-
-              <!-- Mappings list -->
-              <div class="overflow-y-auto max-h-48 border border-[var(--border)] rounded-xl p-1 bg-[var(--background)] flex-1">
-                <table class="w-full text-left border-collapse text-[10px]">
-                  <thead>
-                    <tr class="border-b border-[var(--border)] text-[var(--muted-foreground)] font-bold uppercase tracking-wider text-[7px] pb-1">
-                      <th class="pb-1" data-i18n="camera_name_label">Kamera Nomi</th>
-                      <th class="pb-1" data-i18n="select_script">Birlashtirilgan Ssenariy</th>
-                      <th class="pb-1 text-right" data-i18n="camera_integration_title">Integratsiya</th>
-                    </tr>
-                  </thead>
-                  <tbody id="mappings-tbody">
-                    <!-- Dynamic -->
-                  </tbody>
-                </table>
-              </div>
-
-              <!-- Integration tool form -->
-              <form onsubmit="integrateCameraScript(event)" class="space-y-3 pt-3 border-t border-[var(--border)]">
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="space-y-1">
-                    <label class="block text-[8px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="select_camera">Kamerani Tanlang</label>
-                    <select id="map-camera-select" class="w-full border border-[var(--border)] rounded-xl px-3 py-1.5 bg-[var(--card)] text-xs text-[var(--foreground)]"></select>
-                  </div>
-                  <div class="space-y-1">
-                    <label class="block text-[8px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider" data-i18n="select_script">Ssenariyni Tanlang</label>
-                    <select id="map-script-select" class="w-full border border-[var(--border)] rounded-xl px-3 py-1.5 bg-[var(--card)] text-xs text-[var(--foreground)]"></select>
-                  </div>
-                </div>
-                <button type="submit" class="w-full bg-violet-600 text-white text-[9px] font-bold py-2 rounded-xl hover:bg-violet-700 transition" data-i18n="integrate_btn">⚡ Integratsiya qilish (Ulash)</button>
-              </form>
-            </div>
-            
-          </div>
-
-          <!-- KASSA OLDI SNAPSHOT TARIXI -->
-          <div class="bg-[var(--card)] border border-[var(--border)] shadow-sm rounded-3xl p-6 text-left space-y-4">
+        <!-- 2. TAB: ROOMS (HAMMOM & SAUNA) -->
+        <div id="tab-rooms_hammom" class="tab-pane space-y-6 hidden">
+          <div class="flex justify-between items-center">
             <div>
-              <h4 class="text-sm font-bold flex items-center">
-                <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full mr-2"></span>
-                <span data-i18n="visitor_logs_title">Kassa Oldida Aniqlangan Yangi Yuzlar</span>
-              </h4>
-              <p class="text-[11px] text-[var(--muted-foreground)]" data-i18n="visitor_logs_desc">Kun davomida kassa oldidagi yuz aniqlash datchigi orqali olingan snapshots tarixi</p>
+              <h3 class="text-base font-bold text-[var(--text-main)]">Hammom Xonalari (#1 - #9)</h3>
+              <p class="text-xs text-[var(--text-muted)]">Hammam xonalari harorati, tozaligi va bandlik taymerlari</p>
             </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4" id="visitor-log-container">
-              <!-- Dynamically populated visitor cards -->
+            <div class="flex items-center space-x-2 text-xs font-semibold">
+              <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> <span>Bo'sh</span></span>
+              <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> <span>Band</span></span>
+              <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> <span>Tozalanmoqda</span></span>
             </div>
           </div>
 
-        </div>
-
-        <!-- OTHER TABS PLACEHOLDER -->
-        <div id="tab-dashboard_home" class="space-y-6 hidden">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div class="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 text-left space-y-2">
-              <h4 class="text-xs text-[var(--muted-foreground)] font-semibold uppercase">Bugungi tushum</h4>
-              <p class="text-2xl font-bold text-emerald-600">8,450,000 UZS</p>
-            </div>
-            <div class="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 text-left space-y-2">
-              <h4 class="text-xs text-[var(--muted-foreground)] font-semibold uppercase">Faol xonalar</h4>
-              <p class="text-2xl font-bold">12 / 18 xona</p>
-            </div>
-            <div class="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 text-left space-y-2">
-              <h4 class="text-xs text-[var(--muted-foreground)] font-semibold uppercase">Mijozlar soni</h4>
-              <p class="text-2xl font-bold">48 nafar</p>
-            </div>
-            <div class="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 text-left space-y-2">
-              <h4 class="text-xs text-[var(--muted-foreground)] font-semibold uppercase">Faol datchiklar</h4>
-              <p class="text-2xl font-bold text-emerald-500">Normal (COM3)</p>
-            </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5" id="hammom-grid">
+            <!-- Filled dynamically -->
           </div>
         </div>
 
-        <div id="tab-rooms" class="space-y-6 hidden">
-          <h3 class="text-lg font-bold text-left">Hammam & Sauna Xonalari Holati</h3>
-          <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4" id="rooms-grid">
-            <!-- Dynamic Room layouts -->
+        <div id="tab-rooms_sauna" class="tab-pane space-y-6 hidden">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-base font-bold text-[var(--text-main)]">Fin va Rus Saunalari (#10 - #18)</h3>
+              <p class="text-xs text-[var(--text-muted)]">Sauna kabinalarining harorat va pech datchiklari holati</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5" id="sauna-grid">
+            <!-- Filled dynamically -->
           </div>
         </div>
 
-        <div id="tab-staff" class="space-y-6 hidden">
-          <h3 class="text-lg font-bold text-left">Xodimlar Davomati va KPI Hisobotlari</h3>
-          <div class="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 overflow-x-auto text-left">
-            <table class="w-full border-collapse text-xs">
+        <!-- 3. TAB: STAFF -->
+        <div id="tab-staff" class="tab-pane space-y-6 hidden">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-base font-bold text-[var(--text-main)]">Xodimlar Ro'yxati va Davomat</h3>
+              <p class="text-xs text-[var(--text-muted)]">Xodimlar oyligi, KPI samaradorligi, bonuslar va jarimalar</p>
+            </div>
+            <button onclick="showToast('Yangi xodim qo\'shish modali', 'info')" class="bg-[var(--primary-btn)] text-[var(--primary-btn-text)] px-4 py-2 rounded-xl text-xs font-bold hover:opacity-90 transition">
+              + Yangi Xodim Qo'shish
+            </button>
+          </div>
+
+          <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl overflow-hidden shadow-sm">
+            <table class="w-full text-left border-collapse text-xs">
               <thead>
-                <tr class="border-b border-[var(--border)] text-[var(--muted-foreground)] pb-2">
-                  <th class="pb-2">Ism</th>
-                  <th class="pb-2">Lavozim</th>
-                  <th class="pb-2">KPI ball</th>
-                  <th class="pb-2">Bugungi holat</th>
+                <tr class="border-b border-[var(--card-border)] bg-[var(--bg-page)] text-[var(--text-muted)] font-bold uppercase tracking-wider text-[9px]">
+                  <th class="p-4">Xodim</th>
+                  <th class="p-4">Lavozimi</th>
+                  <th class="p-4">Telefon</th>
+                  <th class="p-4">Asosiy Oylik</th>
+                  <th class="p-4">KPI Ball</th>
+                  <th class="p-4">Status</th>
+                  <th class="p-4 text-right">Amallar</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr class="border-b border-[var(--border)]">
-                  <td class="py-3">Aliyev Valijon</td>
-                  <td class="py-3">Menejer</td>
-                  <td class="py-3 text-emerald-600 font-bold">95</td>
-                  <td class="py-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[10px]">Ish joyida</span></td>
-                </tr>
-                <tr class="border-b border-[var(--border)]">
-                  <td class="py-3">Karimov Sunnat</td>
-                  <td class="py-3">Kassir</td>
-                  <td class="py-3 text-amber-500 font-bold">78</td>
-                  <td class="py-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[10px]">Ish joyida</span></td>
-                </tr>
+              <tbody class="divide-y divide-[var(--card-border)]" id="staff-table-body">
+                <!-- Filled dynamically -->
               </tbody>
             </table>
           </div>
         </div>
 
-        <div id="tab-settings" class="space-y-6 hidden">
-          <div class="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-8 max-w-xl mx-auto text-left space-y-6">
+        <!-- 4. TAB: FACE ID & CAMERAS -->
+        <div id="tab-face_id" class="tab-pane space-y-6 hidden">
+          
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <div class="border-b border-[var(--border)] pb-3">
-              <h3 class="text-lg font-bold">Tizim Sozlamalari</h3>
+            <!-- Active camera links table -->
+            <div class="lg:col-span-2 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-6 space-y-4 shadow-sm">
+              <div class="flex justify-between items-center">
+                <div>
+                  <h4 class="text-sm font-bold text-[var(--text-main)]">Faol Kamera Aloqalari va API Tokenlar</h4>
+                  <p class="text-[11px] text-[var(--text-muted)]">Ulangan kameralar, portlar va xavfsizlik tokenlari ro'yxati</p>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800">● 3 ta Kamera Faol</span>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr class="border-b border-[var(--card-border)] text-[var(--text-muted)] font-bold uppercase text-[8px] pb-2">
+                      <th class="pb-2">Kamera Nomi</th>
+                      <th class="pb-2">Aloqa Turi</th>
+                      <th class="pb-2">Port / Manzil</th>
+                      <th class="pb-2">Vazifasi</th>
+                      <th class="pb-2">API Token</th>
+                      <th class="pb-2 text-right">Amal</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-[var(--card-border)]" id="camera-table-body">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
             </div>
 
-            <!-- Language -->
-            <div class="flex justify-between items-center">
+            <!-- Camera Token Generator Form -->
+            <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-6 space-y-4 shadow-sm">
               <div>
-                <h4 class="text-xs font-bold uppercase tracking-wider" data-i18n="lang_label">Tizim tili</h4>
-                <p class="text-[10px] text-[var(--muted-foreground)]">Interfeys ko'rsatish tilini o'zgartirish</p>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-[var(--text-main)]">Kamera Token Generator</h4>
+                <p class="text-[10px] text-[var(--text-muted)]">Kameraga yangi API token yaratish va vazifa biriktirish</p>
               </div>
-              <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-[var(--background)] border border-[var(--border)] rounded-xl px-3 py-1.5 text-xs text-[var(--foreground)]">
-                <option value="uz">O'zbekcha (UZ)</option>
-                <option value="ru">Русский (RU)</option>
-                <option value="en">English (EN)</option>
-                <option value="tr">Türkçe (TR)</option>
-              </select>
+
+              <form onsubmit="handleCreateCamera(event)" class="space-y-3">
+                <div class="space-y-1">
+                  <label class="block text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Kamera Nomi</label>
+                  <input id="cam-name-input" type="text" required placeholder="Masalan: Resepsiyon Tablet" class="w-full border border-[var(--card-border)] rounded-xl px-3 py-2 bg-[var(--bg-page)] text-xs text-[var(--text-main)] font-semibold focus:outline-none focus:ring-1 focus:ring-[#c5a059]">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Aloqa Turi</label>
+                    <select id="cam-type-input" class="w-full border border-[var(--card-border)] rounded-xl px-3 py-2 bg-[var(--card-bg)] text-xs text-[var(--text-main)] font-medium">
+                      <option value="USB">USB Veb-kamera</option>
+                      <option value="RTSP">RTSP Tarmoq oqimi</option>
+                      <option value="WIRELESS">Simsiz / API</option>
+                    </select>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Vazifasi</label>
+                    <select id="cam-perm-input" class="w-full border border-[var(--card-border)] rounded-xl px-3 py-2 bg-[var(--card-bg)] text-xs text-[var(--text-main)] font-medium">
+                      <option value="full_access">To'liq (Kirish/Chiqish)</option>
+                      <option value="employee_efficiency">KPI & Davomat</option>
+                      <option value="cashier_visitor_catcher">Kassa Visitor Catcher</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="space-y-1">
+                  <label class="block text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Ulanish Manzili (Port)</label>
+                  <input id="cam-address-input" type="text" required placeholder="COM3 yoki rtsp://192.168.1.50:554" class="w-full border border-[var(--card-border)] rounded-xl px-3 py-2 bg-[var(--bg-page)] text-xs text-[var(--text-main)] font-semibold focus:outline-none focus:ring-1 focus:ring-[#c5a059]">
+                </div>
+
+                <div class="space-y-1">
+                  <label class="block text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Ssenariylar Kutubxonasidan Tanlash</label>
+                  <select id="cam-script-select" onchange="onSelectScriptInForm(this.value)" class="w-full border border-[var(--card-border)] rounded-xl px-3 py-2 bg-[var(--card-bg)] text-xs text-[var(--text-main)] font-medium">
+                    <option value="">-- Ssenariy tanlash (Ixtiyoriy) --</option>
+                  </select>
+                </div>
+
+                <div class="space-y-1">
+                  <label class="block text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Ssenariy Kodi</label>
+                  <textarea id="cam-code-input" rows="2" class="w-full border border-[var(--card-border)] rounded-xl px-3 py-1.5 bg-[var(--bg-page)] font-mono text-[9px] text-[var(--text-main)] focus:outline-none"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-[var(--primary-btn)] text-[var(--primary-btn-text)] text-xs font-bold py-2.5 rounded-xl hover:opacity-90 active:scale-95 transition">
+                  Token Yaratish va Saqlash
+                </button>
+              </form>
             </div>
 
-            <!-- Theme -->
+          </div>
+
+          <!-- Ssenariylar Kutubxonasi va Integratsiya Paneli -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Script library -->
+            <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-6 space-y-4 shadow-sm">
+              <div>
+                <h4 class="text-sm font-bold text-[var(--text-main)] flex items-center">
+                  <span class="w-2.5 h-2.5 bg-indigo-500 rounded-full mr-2"></span>
+                  <span>Ssenariy Kodlar Kutubxonasi</span>
+                </h4>
+                <p class="text-[11px] text-[var(--text-muted)]">Kameralarga biriktiriladigan tayyor Python/OpenCV avtomatlashtirish algoritmlari</p>
+              </div>
+
+              <div class="overflow-y-auto max-h-40 border border-[var(--card-border)] rounded-xl bg-[var(--bg-page)] p-1">
+                <table class="w-full text-left border-collapse text-[10px]">
+                  <thead>
+                    <tr class="border-b border-[var(--card-border)] text-[var(--text-muted)] font-bold uppercase text-[7px] pb-1">
+                      <th class="p-1.5">Ssenariy Nomi</th>
+                      <th class="p-1.5">Tavsifi</th>
+                      <th class="p-1.5 text-right">Amal</th>
+                    </tr>
+                  </thead>
+                  <tbody id="script-table-body">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Add script mini form -->
+              <form onsubmit="handleCreateScript(event)" class="space-y-2 pt-2 border-t border-[var(--card-border)]">
+                <div class="grid grid-cols-2 gap-2">
+                  <input id="new-script-title" type="text" required placeholder="Ssenariy nomi" class="border border-[var(--card-border)] rounded-lg px-2.5 py-1 text-xs bg-[var(--card-bg)] text-[var(--text-main)]">
+                  <input id="new-script-desc" type="text" placeholder="Qisqacha tavsif" class="border border-[var(--card-border)] rounded-lg px-2.5 py-1 text-xs bg-[var(--card-bg)] text-[var(--text-main)]">
+                </div>
+                <textarea id="new-script-code" rows="2" required placeholder="def on_face_detect(face_id): ..." class="w-full border border-[var(--card-border)] rounded-lg p-2 font-mono text-[9px] bg-[var(--bg-page)] text-[var(--text-main)]"></textarea>
+                <button type="submit" class="w-full bg-[var(--primary-btn)] text-[var(--primary-btn-text)] text-[10px] font-bold py-1.5 rounded-lg hover:opacity-90 transition">
+                  + Kutubxonaga Qo'shish
+                </button>
+              </form>
+            </div>
+
+            <!-- Mapping panel -->
+            <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-6 space-y-4 shadow-sm flex flex-col justify-between">
+              <div>
+                <h4 class="text-sm font-bold text-[var(--text-main)] flex items-center">
+                  <span class="w-2.5 h-2.5 bg-violet-500 rounded-full mr-2"></span>
+                  <span>Kamera va Kod Integratsiyasi</span>
+                </h4>
+                <p class="text-[11px] text-[var(--text-muted)]">Tanlangan kamerani kutubxonadagi maxsus ssenariyga bog'lash</p>
+              </div>
+
+              <div class="overflow-y-auto max-h-40 border border-[var(--card-border)] rounded-xl bg-[var(--bg-page)] p-1 flex-1">
+                <table class="w-full text-left border-collapse text-[10px]">
+                  <thead>
+                    <tr class="border-b border-[var(--card-border)] text-[var(--text-muted)] font-bold uppercase text-[7px] pb-1">
+                      <th class="p-1.5">Kamera Nomi</th>
+                      <th class="p-1.5">Biriktirilgan Ssenariy</th>
+                      <th class="p-1.5 text-right">Holat</th>
+                    </tr>
+                  </thead>
+                  <tbody id="mapping-table-body">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Integration form -->
+              <form onsubmit="handleMapIntegration(event)" class="space-y-2 pt-2 border-t border-[var(--card-border)]">
+                <div class="grid grid-cols-2 gap-2">
+                  <select id="map-cam-select" class="border border-[var(--card-border)] rounded-lg px-2 py-1.5 text-xs bg-[var(--card-bg)] text-[var(--text-main)]"></select>
+                  <select id="map-sc-select" class="border border-[var(--card-border)] rounded-lg px-2 py-1.5 text-xs bg-[var(--card-bg)] text-[var(--text-main)]"></select>
+                </div>
+                <button type="submit" class="w-full bg-violet-600 hover:bg-violet-700 text-white text-[10px] font-bold py-1.5 rounded-lg transition">
+                  ⚡ Integratsiya Qilish (Bog'lash)
+                </button>
+              </form>
+            </div>
+
+          </div>
+
+          <!-- KASSA OLDI SNAPSHOT TARIXI -->
+          <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-6 space-y-4 shadow-sm">
             <div class="flex justify-between items-center">
               <div>
-                <h4 class="text-xs font-bold uppercase tracking-wider" data-i18n="theme_label">Ranglar Mavzusi</h4>
-                <p class="text-[10px] text-[var(--muted-foreground)]">Dizayn rangini sozlash</p>
+                <h4 class="text-sm font-bold text-[var(--text-main)] flex items-center">
+                  <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full mr-2"></span>
+                  <span>Kassa Oldida Aniqlangan Yangi Yuzlar (Visitor Log)</span>
+                </h4>
+                <p class="text-[11px] text-[var(--text-muted)]">Kassa oldidagi kamera tomonidan kun davomida olingan real snapshots arxivi</p>
               </div>
-              <select id="theme-select" onchange="changeTheme(this.value)" class="bg-[var(--background)] border border-[var(--border)] rounded-xl px-3 py-1.5 text-xs text-[var(--foreground)]">
-                <option value="light">Yorug' (Classic)</option>
-                <option value="dark">Qorong'i (Night)</option>
-                <option value="gold">Gold (Premium)</option>
-              </select>
+              <button onclick="simulateNewVisitorFace()" class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-emerald-100 transition">
+                📷 Yangi Yuzni Aniqlash (Simulyatsiya)
+              </button>
             </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4" id="visitor-grid">
+              <!-- Dynamic -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 5. TAB: CUSTOMERS -->
+        <div id="tab-customers" class="tab-pane space-y-6 hidden">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-base font-bold text-[var(--text-main)]">Doimiy Mijozlar Bazasi</h3>
+              <p class="text-xs text-[var(--text-muted)]">Mijozlarning tashriflar soni, jamg'arilgan keshbek va qarzlar</p>
+            </div>
+            <button onclick="showToast('Yangi mijoz qo\'shish modali', 'info')" class="bg-[var(--primary-btn)] text-[var(--primary-btn-text)] px-4 py-2 rounded-xl text-xs font-bold hover:opacity-90 transition">
+              + Yangi Mijoz
+            </button>
+          </div>
+
+          <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl overflow-hidden shadow-sm">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-[var(--card-border)] bg-[var(--bg-page)] text-[var(--text-muted)] font-bold uppercase tracking-wider text-[9px]">
+                  <th class="p-4">Mijoz Ismi</th>
+                  <th class="p-4">Telefon</th>
+                  <th class="p-4">Tashriflar</th>
+                  <th class="p-4">Jami Sarflangan</th>
+                  <th class="p-4">Keshbek</th>
+                  <th class="p-4">Qarz / Depozit</th>
+                  <th class="p-4 text-right">Amal</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--card-border)]" id="customer-table-body">
+                <!-- Dynamic -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 6. TAB: FINANCE -->
+        <div id="tab-finance" class="tab-pane space-y-6 hidden">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-base font-bold text-[var(--text-main)]">Moliya & Kassa Hisoboti</h3>
+              <p class="text-xs text-[var(--text-muted)]">Kassa balansi, to'lov turlari, tushum va xarajatlar tarixi</p>
+            </div>
+            <div class="flex space-x-2">
+              <button onclick="openFinanceModal('income')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition">
+                + Kirim Qilish
+              </button>
+              <button onclick="openFinanceModal('expense')" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition">
+                - Chiqim Qilish
+              </button>
+            </div>
+          </div>
+
+          <!-- 3 Wallets -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-5 space-y-2 shadow-sm">
+              <span class="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">💵 Naqd Pul Kassasi</span>
+              <h4 class="text-2xl font-black text-emerald-600" id="wallet-cash">22,400,000 UZS</h4>
+              <p class="text-[11px] text-[var(--text-muted)]">Bugun kirdi: +4,200,000 UZS</p>
+            </div>
+            <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-5 space-y-2 shadow-sm">
+              <span class="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">💳 Terminal (Humo/Uzcard)</span>
+              <h4 class="text-2xl font-black text-blue-600" id="wallet-card">11,650,000 UZS</h4>
+              <p class="text-[11px] text-[var(--text-muted)]">Bugun kirdi: +2,150,000 UZS</p>
+            </div>
+            <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-5 space-y-2 shadow-sm">
+              <span class="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">📱 Click / Payme Online</span>
+              <h4 class="text-2xl font-black text-purple-600" id="wallet-online">4,150,000 UZS</h4>
+              <p class="text-[11px] text-[var(--text-muted)]">Bugun kirdi: +950,000 UZS</p>
+            </div>
+          </div>
+
+          <!-- Transaction table -->
+          <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-6 space-y-4 shadow-sm">
+            <h4 class="text-sm font-bold text-[var(--text-main)]">Bugungi Moliyaviy Tranzaksiyalar</h4>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="border-b border-[var(--card-border)] text-[var(--text-muted)] font-bold uppercase text-[8px] pb-2">
+                    <th class="pb-2">Vaqt</th>
+                    <th class="pb-2">Turi</th>
+                    <th class="pb-2">Kategoriya / Izoh</th>
+                    <th class="pb-2">To'lov Usuli</th>
+                    <th class="pb-2">Summa</th>
+                    <th class="pb-2">Kassir</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-[var(--card-border)]" id="finance-table-body">
+                  <!-- Dynamic -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. TAB: PARTNERS -->
+        <div id="tab-partners" class="tab-pane space-y-6 hidden">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-base font-bold text-[var(--text-main)]">Hamkorlar va Ta'minotchilar</h3>
+              <p class="text-xs text-[var(--text-muted)]">Mahsulot yetkazib beruvchilar va hisob-kitob balansi</p>
+            </div>
+            <button onclick="showToast('Yangi hamkor kiritish', 'info')" class="bg-[var(--primary-btn)] text-[var(--primary-btn-text)] px-4 py-2 rounded-xl text-xs font-bold hover:opacity-90 transition">
+              + Yangi Hamkor
+            </button>
+          </div>
+
+          <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl overflow-hidden shadow-sm">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-[var(--card-border)] bg-[var(--bg-page)] text-[var(--text-muted)] font-bold uppercase tracking-wider text-[9px]">
+                  <th class="p-4">Hamkor Nomi</th>
+                  <th class="p-4">Yetkazib Beruvchi Turi</th>
+                  <th class="p-4">Telefon</th>
+                  <th class="p-4">Oxirgi Yetkazib Berish</th>
+                  <th class="p-4">Hisob-kitob Balansi</th>
+                  <th class="p-4 text-right">Amal</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--card-border)]" id="partners-table-body">
+                <!-- Dynamic -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 8. TAB: WAREHOUSE (OMBOR) -->
+        <div id="tab-warehouse" class="tab-pane space-y-6 hidden">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-base font-bold text-[var(--text-main)]">Omborxona Mahsulotlar Qoldig'i</h3>
+              <p class="text-xs text-[var(--text-muted)]">Bar, sauna anjomlari va gigiyena vositalari zaxirasi</p>
+            </div>
+            <button onclick="openNewProductModal()" class="bg-[var(--primary-btn)] text-[var(--primary-btn-text)] px-4 py-2 rounded-xl text-xs font-bold hover:opacity-90 transition">
+              + Yangi Tovar Qo'shish
+            </button>
+          </div>
+
+          <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl overflow-hidden shadow-sm">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-[var(--card-border)] bg-[var(--bg-page)] text-[var(--text-muted)] font-bold uppercase tracking-wider text-[9px]">
+                  <th class="p-4">Shtrixkod</th>
+                  <th class="p-4">Mahsulot Nomi</th>
+                  <th class="p-4">Kategoriya</th>
+                  <th class="p-4">Qoldiq Soni</th>
+                  <th class="p-4">Tannarxi</th>
+                  <th class="p-4">Sotuv Narxi</th>
+                  <th class="p-4">Holat</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--card-border)]" id="warehouse-table-body">
+                <!-- Dynamic -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 9. TAB: WAREHOUSE SCANNER -->
+        <div id="tab-warehouse_scan" class="tab-pane space-y-6 hidden">
+          <div class="max-w-2xl mx-auto bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-8 space-y-6 shadow-sm text-left">
+            <div>
+              <h3 class="text-base font-bold text-[var(--text-main)] flex items-center space-x-2">
+                <span>🏷️</span>
+                <span>Shtrixkod va RFID Skaneri</span>
+              </h3>
+              <p class="text-xs text-[var(--text-muted)]">USB skaner orqali yoki qo'lda shtrixkod kiritib tovarni aniqlash</p>
+            </div>
+
+            <div class="space-y-4">
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Shtrixkod (Barcode)</label>
+                <div class="flex space-x-2">
+                  <input id="scan-barcode-input" type="text" placeholder="Masalan: 4780001234567" class="flex-1 border border-[var(--card-border)] rounded-xl px-4 py-3 text-sm bg-[var(--bg-page)] text-[var(--text-main)] font-mono font-bold focus:outline-none focus:ring-1 focus:ring-[#c5a059]">
+                  <button onclick="simulateScanSearch()" class="bg-[var(--primary-btn)] text-[var(--primary-btn-text)] px-5 py-3 rounded-xl text-xs font-bold hover:opacity-90 transition">
+                    Skanerlash
+                  </button>
+                </div>
+              </div>
+
+              <!-- Scan Result Box -->
+              <div id="scan-result-box" class="hidden p-5 rounded-2xl border border-[var(--card-border)] bg-[var(--bg-page)] space-y-3">
+                <!-- Filled dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 10. TAB: SETTINGS & RFID SIMULATOR -->
+        <div id="tab-settings" class="tab-pane space-y-6 hidden">
+          <div class="max-w-3xl mx-auto space-y-6">
             
+            <!-- NFC/RFID Card Simulator -->
+            <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-6 space-y-4 shadow-sm text-left">
+              <div>
+                <h3 class="text-sm font-bold text-[var(--text-main)] flex items-center space-x-2">
+                  <span>💳</span>
+                  <span data-i18n="rfid_simulator_title">NFC/RFID Karta Simulyatori</span>
+                </h3>
+                <p class="text-xs text-[var(--text-muted)]" data-i18n="rfid_simulator_desc">COM3 portiga ulangan RFID moduliga karta yaqinlashtirishni sinash va 8-xonani avtomatik band qilish/bo'shatish</p>
+              </div>
+
+              <div class="bg-[var(--bg-page)] border border-[var(--card-border)] rounded-2xl p-4 flex flex-col md:flex-row items-end gap-3">
+                <div class="flex-1 space-y-1 w-full">
+                  <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider" data-i18n="rfid_card_uid_label">Karta UID Kodi (RFID HEX/Decimal)</label>
+                  <input id="rfid-uid-input" type="text" value="RFID-RC522-BAND-001" class="w-full border border-[var(--card-border)] rounded-xl px-3 py-2 text-xs bg-[var(--card-bg)] text-[var(--text-main)] font-mono font-bold focus:outline-none">
+                </div>
+                <button onclick="triggerSimulatedRfidTap()" class="w-full md:w-auto bg-[var(--primary-btn)] text-[var(--primary-btn-text)] text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-90 active:scale-95 transition flex items-center justify-center space-x-1.5">
+                  <span>💳</span>
+                  <span data-i18n="rfid_tap_btn">Kartani Tekkizish (Tap)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Cashier Permissions Matrix -->
+            <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-6 space-y-4 shadow-sm text-left">
+              <div>
+                <h3 class="text-sm font-bold text-[var(--text-main)]" data-i18n="cashier_permissions_title">Kassir Ruxsat Sozlamalari (Permissions)</h3>
+                <p class="text-xs text-[var(--text-muted)]" data-i18n="cashier_permissions_desc">Super Admin tomonidan kassir rollari uchun ruxsat berilgan maxsus bo'limlar</p>
+              </div>
+
+              <div class="space-y-3">
+                <label class="flex items-center space-x-3 p-3 rounded-2xl border border-[var(--card-border)] bg-[var(--bg-page)] cursor-pointer">
+                  <input type="checkbox" id="perm-kpi" checked onchange="updateCashierPerms()" class="rounded text-black w-4 h-4">
+                  <span class="text-xs font-semibold text-[var(--text-main)]" data-i18n="perm_cashier_kpi">Kassirlarga xodimlar maoshi va KPI davomatini ko'rishga ruxsat</span>
+                </label>
+                <label class="flex items-center space-x-3 p-3 rounded-2xl border border-[var(--card-border)] bg-[var(--bg-page)] cursor-pointer">
+                  <input type="checkbox" id="perm-finance" checked onchange="updateCashierPerms()" class="rounded text-black w-4 h-4">
+                  <span class="text-xs font-semibold text-[var(--text-main)]" data-i18n="perm_cashier_finance">Kassirlarga moliya va xarajatlar bo'limini ko'rishga ruxsat</span>
+                </label>
+                <label class="flex items-center space-x-3 p-3 rounded-2xl border border-[var(--card-border)] bg-[var(--bg-page)] cursor-pointer">
+                  <input type="checkbox" id="perm-warehouse" checked onchange="updateCashierPerms()" class="rounded text-black w-4 h-4">
+                  <span class="text-xs font-semibold text-[var(--text-main)]" data-i18n="perm_cashier_warehouse">Kassirlarga omborxona va tovarlarni kiritishga ruxsat</span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 11. TAB: AUDIT LOGS -->
+        <div id="tab-audit_logs" class="tab-pane space-y-6 hidden">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-base font-bold text-[var(--text-main)]">Tizim Amallari Tarixi (Audit Logs)</h3>
+              <p class="text-xs text-[var(--text-muted)]">Kim, qachon, qaysi amalni bajarganligi bo'yicha to'liq xavfsizlik jurnali</p>
+            </div>
+            <button onclick="clearAuditLogs()" class="text-xs font-bold text-rose-500 hover:underline">Jurnalni Tozalash</button>
+          </div>
+
+          <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-6 shadow-sm">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="border-b border-[var(--card-border)] text-[var(--text-muted)] font-bold uppercase text-[8px] pb-2">
+                    <th class="pb-2">Vaqt</th>
+                    <th class="pb-2">Foydalanuvchi</th>
+                    <th class="pb-2">Amal Turi</th>
+                    <th class="pb-2">Batafsil Tafsilot</th>
+                    <th class="pb-2">IP Manzil</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-[var(--card-border)]" id="audit-table-body">
+                  <!-- Dynamic -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -396,409 +881,915 @@
     </main>
   </div>
 
+  <!-- BOOKING MODAL -->
+  <div id="booking-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl text-left">
+      <div class="flex justify-between items-center border-b border-[var(--card-border)] pb-3">
+        <h3 class="text-sm font-bold text-[var(--text-main)]" id="modal-room-title">Xonani Band Qilish</h3>
+        <button onclick="closeModal('booking-modal')" class="text-xs font-bold text-[var(--text-muted)] hover:text-black">✕</button>
+      </div>
+
+      <form onsubmit="submitBooking(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="modal-room-id">
+        <div class="space-y-1">
+          <label class="block font-bold text-[var(--text-muted)] text-[10px] uppercase">Mehmon Ismi / Tashkilot</label>
+          <input id="modal-guest-name" type="text" required placeholder="Masalan: Sardor Rustamov" class="w-full border border-[var(--card-border)] rounded-xl px-3 py-2 bg-[var(--bg-page)] text-[var(--text-main)] font-semibold focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="block font-bold text-[var(--text-muted)] text-[10px] uppercase">Soat davomiyligi</label>
+            <input id="modal-duration" type="number" min="1" max="12" value="2" class="w-full border border-[var(--card-border)] rounded-xl px-3 py-2 bg-[var(--bg-page)] text-[var(--text-main)] font-bold focus:outline-none">
+          </div>
+          <div class="space-y-1">
+            <label class="block font-bold text-[var(--text-muted)] text-[10px] uppercase">Mehmonlar soni</label>
+            <input id="modal-guests-count" type="number" min="1" max="15" value="3" class="w-full border border-[var(--card-border)] rounded-xl px-3 py-2 bg-[var(--bg-page)] text-[var(--text-main)] font-bold focus:outline-none">
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label class="block font-bold text-[var(--text-muted)] text-[10px] uppercase">Soatlik Narxi (UZS)</label>
+          <input id="modal-hourly-rate" type="number" value="180000" class="w-full border border-[var(--card-border)] rounded-xl px-3 py-2 bg-[var(--bg-page)] text-[var(--text-main)] font-bold focus:outline-none">
+        </div>
+
+        <button type="submit" class="w-full bg-[var(--primary-btn)] text-[var(--primary-btn-text)] py-3 rounded-xl font-bold hover:opacity-90 transition">
+          Xonani Faollashtirish (Band Qilish)
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- FINANCE INCOME/EXPENSE MODAL -->
+  <div id="finance-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl text-left">
+      <div class="flex justify-between items-center border-b border-[var(--card-border)] pb-3">
+        <h3 class="text-sm font-bold text-[var(--text-main)]" id="finance-modal-title">Kassaga Kirim Qilish</h3>
+        <button onclick="closeModal('finance-modal')" class="text-xs font-bold text-[var(--text-muted)] hover:text-black">✕</button>
+      </div>
+
+      <form onsubmit="submitFinance(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="finance-modal-type" value="income">
+        <div class="space-y-1">
+          <label class="block font-bold text-[var(--text-muted)] text-[10px] uppercase">Summa (UZS)</label>
+          <input id="finance-amount" type="number" required placeholder="500000" class="w-full border border-[var(--card-border)] rounded-xl px-3 py-2 bg-[var(--bg-page)] text-[var(--text-main)] font-bold text-sm focus:outline-none">
+        </div>
+        <div class="space-y-1">
+          <label class="block font-bold text-[var(--text-muted)] text-[10px] uppercase">To'lov Usuli</label>
+          <select id="finance-method" class="w-full border border-[var(--card-border)] rounded-xl px-3 py-2 bg-[var(--card-bg)] text-[var(--text-main)] font-semibold">
+            <option value="cash">💵 Naqd Pul</option>
+            <option value="card">💳 Plastik Karta</option>
+            <option value="online">📱 Click / Payme</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label class="block font-bold text-[var(--text-muted)] text-[10px] uppercase">Izoh / Maqsadi</label>
+          <input id="finance-note" type="text" required placeholder="Masalan: 4-xona to'lovi" class="w-full border border-[var(--card-border)] rounded-xl px-3 py-2 bg-[var(--bg-page)] text-[var(--text-main)] focus:outline-none">
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold transition">
+          Tranzaksiyani Saqlash
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT STATE ENGINE & 1:1 INTERACTIVITY -->
   <script>
-    // Local memory state for the simulation
+    // System State
+    let currentRole = 'super_admin';
     let currentLang = 'uz';
+    let currentTab = 'dashboard_home';
+
+    const permissions = {
+      cashierViewKpi: true,
+      cashierViewFinance: true,
+      cashierViewWarehouse: true
+    };
+
+    // Translations Dictionary 1:1 with real app
     const translations = {
       uz: {
-        dashboard_label: "Boshqaruv Paneli",
+        nav_dashboard: "Boshqaruv Paneli",
         nav_dashboard_home: "Kunlik Statistika",
         nav_rooms: "Xonalar holati",
         nav_staff: "Xodimlar & Davomat",
-        nav_face_id: "Face ID Nazorati",
+        nav_customers: "Mijozlar",
+        nav_finance: "Moliya & Kassa",
+        nav_partners: "Hamkorlar",
+        nav_warehouse: "Omborxona",
         nav_settings: "Sozlamalar",
-        camera_tokens_title: "Faol Kamera Aloqalari va Tokenlar",
-        camera_tokens_desc: "Tizimga ulangan kameralar, ularning aloqa turi va tokenlari ro'yxati",
-        camera_generator_title: "Kamera Token Generator",
-        camera_generator_desc: "Har bir kamera uchun bitta alohida ulanish va API tokenini yaratish",
-        camera_name_label: "Kamera Nomi",
-        connection_type_label: "Aloqa Turi",
-        camera_permissions_label: "Vazifasi",
-        connection_address_label: "Ulanish Manzili",
-        camera_purpose_label: "Tavsif (Maqsadi)",
-        camera_code_label: "Ssenariy Kodi / Algoritm",
-        token_create_btn: "Token Yaratish va Ulash",
-        select_script_label: "Ssenariylar Kutubxonasidan Tanlash",
-        script_library_title: "Ssenariy Kodlar Kutubxonasi",
-        script_library_desc: "Kameralarga biriktirish uchun qayta ishlatiladigan ssenariylar bazasi",
-        camera_integration_title: "Kamera va Kod Integratsiyasi",
-        camera_integration_desc: "Tanlangan kamerani kutubxonadagi maxsus ssenariyga bog'lash",
-        script_name: "Ssenariy Nomi",
-        script_code: "Ssenariy Kodi",
-        description: "Tavsif",
-        select_camera: "Kamerani Tanlang",
-        select_script: "Ssenariyni Tanlang",
-        integrate_btn: "Integratsiya qilish (Ulash)",
-        add_to_library: "Kutubxonaga Qo'shish",
-        visitor_logs_title: "Kassa Oldida Aniqlangan Yangi Yuzlar",
-        visitor_logs_desc: "Kun davomida kassa oldidagi yuz aniqlash datchigi orqali olingan snapshots tarixi",
-        name: "Nomi",
-        action: "Amal",
-        lang_label: "Tizim tili",
-        theme_label: "Ranglar Mavzusi"
+        nav_audit_logs: "Oxirgi amallar",
+        rfid_simulator_title: "NFC/RFID Karta Simulyatori",
+        rfid_simulator_desc: "COM3 portiga ulangan RFID moduliga karta yaqinlashtirishni sinash va 8-xonani avtomatik band qilish/bo'shatish",
+        rfid_card_uid_label: "Karta UID Kodi (RFID HEX/Decimal)",
+        rfid_tap_btn: "Kartani Tekkizish (Tap)",
+        cashier_permissions_title: "Kassir Ruxsat Sozlamalari (Permissions)",
+        cashier_permissions_desc: "Super Admin tomonidan kassir rollari uchun ruxsat berilgan maxsus bo'limlar",
+        perm_cashier_kpi: "Kassirlarga xodimlar maoshi va KPI davomatini ko'rishga ruxsat",
+        perm_cashier_finance: "Kassirlarga moliya va xarajatlar bo'limini ko'rishga ruxsat",
+        perm_cashier_warehouse: "Kassirlarga omborxona va tovarlarni kiritishga ruxsat",
+        logout: "Tizimdan chiqish"
       },
       ru: {
-        dashboard_label: "Панель Управления",
+        nav_dashboard: "Панель Управления",
         nav_dashboard_home: "Ежедневная статистика",
-        nav_rooms: "Состояние комнат",
-        nav_staff: "Сотрудники и явка",
-        nav_face_id: "Контроль Face ID",
+        nav_rooms: "Состояние номеров",
+        nav_staff: "Персонал и явка",
+        nav_customers: "Клиенты",
+        nav_finance: "Финансы и касса",
+        nav_partners: "Партнеры",
+        nav_warehouse: "Склад",
         nav_settings: "Настройки",
-        camera_tokens_title: "Активные подключения камер и токены",
-        camera_tokens_desc: "Список подключенных к системе камер, их типов связи и токенов безопасности",
-        camera_generator_title: "Генератор токенов камер",
-        camera_generator_desc: "Создание отдельного подключения и токена API для каждой камеры",
-        camera_name_label: "Название камеры",
-        connection_type_label: "Тип связи",
-        camera_permissions_label: "Задача камеры",
-        connection_address_label: "Адрес подключения",
-        camera_purpose_label: "Описание (Цель)",
-        camera_code_label: "Сценарий / Код алгоритма для камеры",
-        token_create_btn: "Создать токен и подключить",
-        select_script_label: "Выбрать из библиотеки сценариев",
-        script_library_title: "Библиотека кодов сценариев",
-        script_library_desc: "База многократных кодов/сценариев для привязки к камерам",
-        camera_integration_title: "Интеграция камеры и кода",
-        camera_integration_desc: "Привязка выбранной камеры к сценарию из библиотеки",
-        script_name: "Название сценария",
-        script_code: "Код сценария",
-        description: "Описание",
-        select_camera: "Выберите камеру",
-        select_script: "Выберите сценарий",
-        integrate_btn: "Интегрировать",
-        add_to_library: "Добавить в библиотеку",
-        visitor_logs_title: "Новые лица, обнаруженные у кассы",
-        visitor_logs_desc: "История снимков новых клиентов у кассы в течение дня",
-        name: "Имя",
-        action: "Действие",
-        lang_label: "Язык системы",
-        theme_label: "Цветовая тема"
+        nav_audit_logs: "История действий",
+        rfid_simulator_title: "Симулятор NFC/RFID карт",
+        rfid_simulator_desc: "Симуляция прикладывания карты к RFID модулю COM3 для автоматической брони 8-го номера",
+        rfid_card_uid_label: "UID код карты (HEX/Decimal)",
+        rfid_tap_btn: "Приложить карту (Tap)",
+        cashier_permissions_title: "Настройки прав кассира (Permissions)",
+        cashier_permissions_desc: "Разрешенные разделы для кассиров, настраиваемые супер-администратором",
+        perm_cashier_kpi: "Разрешить кассирам просмотр зарплат и KPI посещаемости",
+        perm_cashier_finance: "Разрешить кассирам доступ к разделу финансов",
+        perm_cashier_warehouse: "Разрешить кассирам доступ к складу и товарам",
+        logout: "Выйти из системы"
       },
       en: {
-        dashboard_label: "Control Panel",
+        nav_dashboard: "Control Panel",
         nav_dashboard_home: "Daily Statistics",
-        nav_rooms: "Rooms Status",
+        nav_rooms: "Room Status",
         nav_staff: "Staff & Attendance",
-        nav_face_id: "Face ID Control",
+        nav_customers: "Customers",
+        nav_finance: "Finance & Cash",
+        nav_partners: "Partners",
+        nav_warehouse: "Warehouse",
         nav_settings: "Settings",
-        camera_tokens_title: "Active Camera Connections & Tokens",
-        camera_tokens_desc: "List of cameras connected to the system, their connection types, and security tokens",
-        camera_generator_title: "Camera Token Generator",
-        camera_generator_desc: "Generate a separate connection and API token for each camera",
-        camera_name_label: "Camera Name",
-        connection_type_label: "Connection Type",
-        camera_permissions_label: "Camera Role",
-        connection_address_label: "Connection Address",
-        camera_purpose_label: "Description (Purpose)",
-        camera_code_label: "Camera Scenario Script / Algorithm",
-        token_create_btn: "Generate Token and Connect",
-        select_script_label: "Select from Script Library",
-        script_library_title: "Scenario Scripts Library",
-        script_library_desc: "Database of reusable automation codes/scripts to bind with cameras",
-        camera_integration_title: "Camera & Script Integration",
-        camera_integration_desc: "Bind selected camera to a custom scenario from script library",
-        script_name: "Script Title",
-        script_code: "Script Code",
-        description: "Description",
-        select_camera: "Select Camera",
-        select_script: "Select Script",
-        integrate_btn: "Integrate",
-        add_to_library: "Add to Library",
-        visitor_logs_title: "New Faces Detected at Cash Counter",
-        visitor_logs_desc: "Snapshot history of new customer faces captured by face recognition sensor at register",
-        name: "Name",
-        action: "Action",
-        lang_label: "System Language",
-        theme_label: "Color Theme"
+        nav_audit_logs: "Audit Logs",
+        rfid_simulator_title: "NFC/RFID Card Tap Simulator",
+        rfid_simulator_desc: "Simulate tapping RFID card on COM3 port to automatically toggle occupancy of Room 8",
+        rfid_card_uid_label: "Card UID Code (RFID HEX/Decimal)",
+        rfid_tap_btn: "Tap Card",
+        cashier_permissions_title: "Cashier Access Permissions",
+        cashier_permissions_desc: "Configured permissions allowed for cashier roles by Super Admin",
+        perm_cashier_kpi: "Allow cashiers to view staff payroll and KPI scores",
+        perm_cashier_finance: "Allow cashiers to view finance & expenses",
+        perm_cashier_warehouse: "Allow cashiers to view warehouse and products",
+        logout: "Log out"
+      },
+      tr: {
+        nav_dashboard: "Yönetim Paneli",
+        nav_dashboard_home: "Günlük İstatistikler",
+        nav_rooms: "Oda Durumları",
+        nav_staff: "Personel ve Devam",
+        nav_customers: "Müşteriler",
+        nav_finance: "Finans & Kasa",
+        nav_partners: "İş Ortakları",
+        nav_warehouse: "Depo",
+        nav_settings: "Ayarlar",
+        nav_audit_logs: "İşlem Geçmişi",
+        rfid_simulator_title: "NFC/RFID Kart Simülatörü",
+        rfid_simulator_desc: "COM3 portundaki RFID modülü ile 8 numaralı odayı otomatik açma/kapama simülasyonu",
+        rfid_card_uid_label: "Kart UID Kodu (HEX/Decimal)",
+        rfid_tap_btn: "Kartı Okut (Tap)",
+        cashier_permissions_title: "Kasiyer İzin Ayarları",
+        cashier_permissions_desc: "Süper Yönetici tarafından kasiyerler için yetkilendirilen bölümler",
+        perm_cashier_kpi: "Kasiyerlerin personel maaş ve devam durumunu görmesine izin ver",
+        perm_cashier_finance: "Kasiyerlerin finans ve giderleri görmesine izin ver",
+        perm_cashier_warehouse: "Kasiyerlerin depo ve ürünleri görmesine izin ver",
+        logout: "Çıkış Yap"
       }
     };
 
+    // Seed Data
+    let rooms = [
+      { id: 1, type: 'Hammom', name: 'Premium Hammom #1', status: 'occupied', guest: 'Sardor Rustamov', timeLeft: 48, total: 360000, rate: 180000 },
+      { id: 2, type: 'Hammom', name: 'VIP Hammom #2', status: 'occupied', guest: 'Javohir Zokirov', timeLeft: 85, total: 540000, rate: 220000 },
+      { id: 3, type: 'Hammom', name: 'Klassik Hammom #3', status: 'available', guest: null, timeLeft: 0, total: 0, rate: 150000 },
+      { id: 4, type: 'Hammom', name: 'Klassik Hammom #4', status: 'occupied', guest: 'Murod Ergashev', timeLeft: 12, total: 300000, rate: 150000 },
+      { id: 5, type: 'Hammom', name: 'Hammom #5', status: 'cleaning', guest: null, timeLeft: 0, total: 0, rate: 150000 },
+      { id: 6, type: 'Hammom', name: 'Hammom #6', status: 'available', guest: null, timeLeft: 0, total: 0, rate: 150000 },
+      { id: 7, type: 'Hammom', name: 'Hammom #7', status: 'available', guest: null, timeLeft: 0, total: 0, rate: 150000 },
+      { id: 8, type: 'Hammom', name: 'RFID Smart Hammom #8', status: 'available', guest: null, timeLeft: 0, total: 0, rate: 200000 },
+      { id: 9, type: 'Hammom', name: 'Hammom #9', status: 'available', guest: null, timeLeft: 0, total: 0, rate: 150000 },
+
+      { id: 10, type: 'Sauna', name: 'Fin Saunasi #10', status: 'occupied', guest: 'Temur Mirzayev', timeLeft: 60, total: 400000, rate: 200000 },
+      { id: 11, type: 'Sauna', name: 'Rus Saunasi #11', status: 'occupied', guest: 'Anvar Qodirov', timeLeft: 35, total: 380000, rate: 190000 },
+      { id: 12, type: 'Sauna', name: 'Fin Saunasi #12', status: 'available', guest: null, timeLeft: 0, total: 0, rate: 200000 },
+      { id: 13, type: 'Sauna', name: 'VIP Sauna #13', status: 'available', guest: null, timeLeft: 0, total: 0, rate: 250000 },
+      { id: 14, type: 'Sauna', name: 'Sauna #14', status: 'cleaning', guest: null, timeLeft: 0, total: 0, rate: 190000 },
+      { id: 15, type: 'Sauna', name: 'Sauna #15', status: 'available', guest: null, timeLeft: 0, total: 0, rate: 190000 },
+      { id: 16, type: 'Sauna', name: 'Sauna #16', status: 'available', guest: null, timeLeft: 0, total: 0, rate: 190000 },
+      { id: 17, type: 'Sauna', name: 'Sauna #17', status: 'available', guest: null, timeLeft: 0, total: 0, rate: 190000 },
+      { id: 18, type: 'Sauna', name: 'Sauna #18', status: 'available', guest: null, timeLeft: 0, total: 0, rate: 190000 }
+    ];
+
+    let staff = [
+      { id: 1, name: 'Aliyev Valijon', role: 'Menejer', phone: '+998 90 123-45-67', salary: '6,500,000', kpi: 96, status: 'Ishda' },
+      { id: 2, name: 'Karimov Sunnat', role: 'Kassir', phone: '+998 93 987-65-43', salary: '4,500,000', kpi: 88, status: 'Ishda' },
+      { id: 3, name: 'Tursunov Bobur', role: 'Barman', phone: '+998 99 444-22-11', salary: '3,800,000', kpi: 92, status: 'Ishda' },
+      { id: 4, name: 'Nazarov Ilhom', role: 'Bannik (Usta)', phone: '+998 97 711-22-33', salary: '5,000,000', kpi: 94, status: 'Tanaffus' }
+    ];
+
     let cameras = [
       { id: 1, name: "Turniket plansheti", connectionType: "USB", connectionAddress: "COM3", permissions: "full_access", token: "tok_sauna_87ab09", scriptTitle: "Kirish nazorati" },
-      { id: 2, name: "Kassa oldi datchigi", connectionType: "WIRELESS", connectionAddress: "REMOTE_API", permissions: "cashier_visitor_catcher", token: "tok_sauna_12ff78", scriptTitle: "Mijoz snap catcher" }
+      { id: 2, name: "Kassa oldi datchigi", connectionType: "WIRELESS", connectionAddress: "REMOTE_API", permissions: "cashier_visitor_catcher", token: "tok_sauna_12ff78", scriptTitle: "Mijoz snap catcher" },
+      { id: 3, name: "Zal umumiy kuzatuv", connectionType: "RTSP", connectionAddress: "rtsp://192.168.1.104:554/ch1", permissions: "employee_efficiency", token: "tok_sauna_99cc44", scriptTitle: "KPI xodim nazorati" }
     ];
 
     let scripts = [
-      { id: 1, title: "Kirish nazorati", description: "Yuz biometriyasini o'qib kpi va davomatga yozadi", code: "if detect_face() == 'worker':\n    checkin()\nelse:\n    reject()" },
-      { id: 2, title: "Mijoz snap catcher", description: "Kassadagi yangi yuzlarni rasmga olib saqlaydi", code: "if detect_face() == 'Stranger':\n    save_snapshot()\n    log_visitor()" }
+      { id: 1, title: "Kirish nazorati", description: "Yuz biometriyasini o'qib kpi va davomatga yozadi", code: "if detect_face() == 'worker':\n    checkin_staff()\nelse:\n    allow_guest()" },
+      { id: 2, title: "Mijoz snap catcher", description: "Kassadagi yangi yuzlarni rasmga olib arxivga saqlaydi", code: "if detect_face() == 'Stranger':\n    save_snapshot()\n    log_visitor()" },
+      { id: 3, title: "KPI xodim nazorati", description: "Ish vaqtida xodimning zalda bo'lish foizini hisoblaydi", code: "if worker_present_duration > 0.8:\n    kpi_score += 5" }
     ];
 
     let visitors = [
-      { id: 1, name: "Turniket 1", time: "12:30:15", date: "31.08.2026", emoji: "👤" },
-      { id: 2, name: "Kassa plansheti", time: "12:32:48", date: "31.08.2026", emoji: "👥" }
+      { id: 1, name: "Yangi Mehmon #108", time: "10:32:15", date: "05.09.2026", emoji: "👤" },
+      { id: 2, name: "Yangi Mehmon #109", time: "10:41:02", date: "05.09.2026", emoji: "🧔" },
+      { id: 3, name: "Yangi Mehmon #110", time: "10:45:30", date: "05.09.2026", emoji: "👨" },
+      { id: 4, name: "Yangi Mehmon #111", time: "10:52:19", date: "05.09.2026", emoji: "🧑" }
     ];
 
-    let rooms = [];
-    for(let i=1; i<=18; i++) {
-      rooms.push({ id: i, type: i<=9 ? 'Hammam' : 'Sauna', active: i % 3 !== 0, occupiedBy: i % 3 !== 0 ? `Mehmon (Karta #${i+100})` : '' });
+    let customers = [
+      { id: 1, name: "Sardor Rustamov", phone: "+998 90 111-22-33", visits: 18, spent: "4,250,000", cashback: "5%", balance: "0 UZS" },
+      { id: 2, name: "Javohir Zokirov", phone: "+998 94 222-33-44", visits: 24, spent: "7,800,000", cashback: "10%", balance: "+150,000 UZS (Depozit)" },
+      { id: 3, name: "Temur Mirzayev", phone: "+998 97 333-44-55", visits: 9, spent: "2,400,000", cashback: "3%", balance: "-120,000 UZS (Qarz)" },
+      { id: 4, name: "Sherzod Alimov", phone: "+998 93 444-55-66", visits: 31, spent: "11,500,000", cashback: "15%", balance: "0 UZS" }
+    ];
+
+    let transactions = [
+      { id: 1, time: "10:45", type: 'income', note: "Hammom #1 to'lovi", method: "Naqd pul", amount: "+360,000", cashier: "Karimov S." },
+      { id: 2, time: "10:30", type: 'income', note: "Sauna #10 to'lovi", method: "Plastik", amount: "+400,000", cashier: "Karimov S." },
+      { id: 3, time: "09:50", type: 'expense', note: "Muz va limon xaridi (Bar)", method: "Naqd pul", amount: "-150,000", cashier: "Aliyev V." },
+      { id: 4, time: "09:15", type: 'income', note: "Mijoz depoziti (Javohir Z.)", method: "Click", amount: "+500,000", cashier: "Karimov S." }
+    ];
+
+    let partners = [
+      { id: 1, name: "Eco Towels MCHJ", type: "Sochiq va xalatlar", phone: "+998 71 200-11-22", lastDate: "01.09.2026", balance: "0 UZS (To'langan)" },
+      { id: 2, name: "Sauna Aroma Oil Group", type: "Efir moylari & Gigiyena", phone: "+998 90 333-88-99", lastDate: "28.08.2026", balance: "-450,000 UZS (Qarzdorlik)" },
+      { id: 3, name: "Ta'minot Beverage", type: "Bar ichimliklari", phone: "+998 97 123-99-00", lastDate: "03.09.2026", balance: "0 UZS" }
+    ];
+
+    let products = [
+      { barcode: "4780011223344", name: "Paxta Sochiq 140x70", category: "Tekstil", qty: 48, cost: 35000, price: 60000 },
+      { barcode: "4780022334455", name: "Qarag'ay Efir Moyi 50ml", category: "Aromaterapiya", qty: 14, cost: 18000, price: 35000 },
+      { barcode: "4780033445566", name: "Eman Supurgisi (Venik)", category: "Sauna", qty: 22, cost: 25000, price: 50000 },
+      { barcode: "4780044556677", name: "Ko'k Choy To'plami (Choynak)", category: "Bar", qty: 95, cost: 8000, price: 25000 },
+      { barcode: "4780055667788", name: "Borjomi 0.5L", category: "Bar", qty: 38, cost: 12000, price: 20000 }
+    ];
+
+    let auditLogs = [
+      { time: "10:52:19", user: "Kassa plansheti", action: "Face ID", desc: "Yangi mijoz aniqlandi va snap saqlandi (#111)", ip: "192.168.1.102" },
+      { time: "10:45:00", user: "Karimov Sunnat", action: "Kirim", desc: "Hammom #1 dan 360,000 UZS qabul qilindi", ip: "192.168.1.5" },
+      { time: "10:30:12", user: "Aliyev Valijon", action: "Xona Bron", desc: "Sauna #10 Temur Mirzayev nomiga 2 soatga ochildi", ip: "192.168.1.4" },
+      { time: "09:00:00", user: "Tizim Avtomatika", action: "Tizim", desc: "Kunlik smena muvaffaqiyatli ochildi", ip: "127.0.0.1" }
+    ];
+
+    // Notification Helper
+    function showToast(message, type = 'success') {
+      const box = document.getElementById('toast-box');
+      const toast = document.createElement('div');
+      const bg = type === 'success' ? 'bg-zinc-950 text-white' : (type === 'error' ? 'bg-rose-600 text-white' : 'bg-indigo-600 text-white');
+      toast.className = `${bg} px-4 py-2.5 rounded-2xl shadow-xl text-xs font-bold flex items-center space-x-2 pointer-events-auto toast-enter`;
+      toast.innerHTML = `<span>${type === 'success' ? '✓' : (type === 'error' ? '✕' : 'ℹ')}</span> <span>${message}</span>`;
+      box.appendChild(toast);
+      
+      requestAnimationFrame(() => { toast.classList.remove('toast-enter'); toast.classList.add('toast-active'); });
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
     }
 
-    // Function to translate components
-    function updateTranslations() {
-      const lang = currentLang;
+    // Role Switching
+    function switchRole(role) {
+      currentRole = role;
+      const roleMap = {
+        super_admin: { name: "Abdurasul", label: "Super Admin", color: "bg-emerald-100 text-emerald-800" },
+        manager: { name: "Aliyev Valijon", label: "Menejer", color: "bg-blue-100 text-blue-800" },
+        cashier: { name: "Karimov Sunnat", label: "Kassir", color: "bg-amber-100 text-amber-800" },
+        barman: { name: "Tursunov Bobur", label: "Barman", color: "bg-purple-100 text-purple-800" }
+      };
+
+      const info = roleMap[role];
+      document.getElementById('role-badge').innerText = info.label;
+      document.getElementById('role-badge').className = `px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${info.color}`;
+      document.getElementById('user-name').innerText = `${info.name} (${info.label})`;
+      document.getElementById('user-role-label').innerText = role;
+      document.getElementById('user-avatar').innerText = info.name.charAt(0);
+
+      // Access Filter logic 1:1 with real app
+      applyRoleAccess();
+      showToast(`Rol o'zgartirildi: ${info.label}`, 'info');
+    }
+
+    function applyRoleAccess() {
+      const isSuper = currentRole === 'super_admin';
+      const isManager = currentRole === 'manager';
+      const isCashier = currentRole === 'cashier';
+      const isBarman = currentRole === 'barman';
+
+      // Audit logs only for super_admin
+      document.getElementById('btn-audit_logs').style.display = isSuper ? 'flex' : 'none';
+
+      // Staff menu
+      document.getElementById('nav-staff-wrapper').style.display = (isSuper || isManager || (isCashier && permissions.cashierViewKpi)) ? 'block' : 'none';
+
+      // Finance menu
+      document.getElementById('btn-finance').style.display = (isSuper || isManager || (isCashier && permissions.cashierViewFinance)) ? 'flex' : 'none';
+
+      // Warehouse menu
+      document.getElementById('nav-warehouse-wrapper').style.display = (isSuper || isManager || isBarman || (isCashier && permissions.cashierViewWarehouse)) ? 'block' : 'none';
+
+      // Partners menu
+      document.getElementById('btn-partners').style.display = (isSuper || isManager) ? 'flex' : 'none';
+    }
+
+    // Tab Navigation
+    function navigateTab(tabId) {
+      currentTab = tabId;
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-zinc-950', 'text-white', 'shadow-xs');
+      });
+
+      const target = document.getElementById(`tab-${tabId}`);
+      if (target) target.classList.remove('hidden');
+
+      const activeBtn = document.getElementById(`btn-${tabId}`);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-zinc-950', 'text-white', 'shadow-xs');
+      }
+
+      // Title & Icon
+      const icons = {
+        dashboard_home: '🏠', rooms_hammom: '🛁', rooms_sauna: '🔥',
+        staff: '👥', face_id: '📹', customers: '👥', finance: '💼',
+        partners: '🤝', warehouse: '📦', warehouse_scan: '🏷️',
+        settings: '⚙️', audit_logs: '📜'
+      };
+      const titles = {
+        dashboard_home: 'Kunlik Statistika', rooms_hammom: 'Hammom Xonalari', rooms_sauna: 'Sauna Xonalari',
+        staff: 'Xodimlar & Davomat', face_id: 'Face ID & Kameralar', customers: 'Mijozlar Bazasi', finance: 'Moliya & Kassa',
+        partners: 'Hamkorlar', warehouse: 'Ombor Qoldig\'i', warehouse_scan: 'Skaner Kiritish',
+        settings: 'Tizim Sozlamalari', audit_logs: 'Amallar Tarixi'
+      };
+
+      document.getElementById('current-tab-icon').innerText = icons[tabId] || '📊';
+      document.getElementById('current-tab-title').innerText = titles[tabId] || 'Boshqaruv Paneli';
+    }
+
+    function toggleMenu(menuId) {
+      const sub = document.getElementById(`sub-${menuId}`);
+      const arrow = document.getElementById(`arrow-${menuId}`);
+      if (sub.classList.contains('hidden')) {
+        sub.classList.remove('hidden');
+        if (arrow) arrow.innerText = '▼';
+      } else {
+        sub.classList.add('hidden');
+        if (arrow) arrow.innerText = '▶';
+      }
+    }
+
+    // Language & Theme Handlers
+    function changeLanguage(lang) {
+      currentLang = lang;
       const dict = translations[lang] || translations['uz'];
-      document.querySelectorAll("[data-i18n]").forEach(el => {
-        const key = el.getAttribute("data-i18n");
-        if (dict[key]) {
-          el.innerText = dict[key];
-        }
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.innerText = dict[key];
       });
+      showToast(`Til o'zgartirildi: ${lang.toUpperCase()}`, 'info');
     }
 
-    // Function to render cameras
-    function renderCameras() {
-      const tbody = document.getElementById("camera-tokens-tbody");
-      tbody.innerHTML = "";
-      cameras.forEach(cam => {
-        const tr = document.createElement("tr");
-        tr.className = "text-zinc-700 dark:text-zinc-300 font-semibold border-b border-[var(--border)]";
-        tr.innerHTML = `
-          <td class="py-2.5 font-bold">${cam.name}</td>
-          <td class="py-2.5">${cam.connectionType}</td>
-          <td class="py-2.5 font-mono text-[9.5px]">${cam.connectionAddress}</td>
-          <td class="py-2.5">${cam.permissions}</td>
-          <td class="py-2.5"><span class="bg-[var(--background)] px-1.5 py-0.5 rounded border border-[var(--border)] font-mono text-[9px]">${cam.token.substring(0,10)}...</span></td>
-          <td class="py-2.5 text-right"><button onclick="deleteCamera(${cam.id})" class="text-rose-500 hover:text-rose-700 font-bold">O'chirish</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      // Update forms select list
-      const camSelect = document.getElementById("map-camera-select");
-      camSelect.innerHTML = "";
-      cameras.forEach(cam => {
-        const opt = document.createElement("option");
-        opt.value = cam.id;
-        opt.innerText = cam.name;
-        camSelect.appendChild(opt);
-      });
+    function changeTheme(theme) {
+      document.body.className = `bg-[var(--bg-page)] text-[var(--text-main)] min-h-screen transition-colors duration-200 theme-${theme}`;
+      showToast(`Mavzu yangilandi: ${theme.toUpperCase()}`, 'info');
     }
 
-    // Function to render scripts
-    function renderScripts() {
-      const tbody = document.getElementById("scripts-tbody");
-      tbody.innerHTML = "";
-      scripts.forEach(sc => {
-        const tr = document.createElement("tr");
-        tr.className = "border-b border-[var(--border)] text-zinc-700 font-semibold last:border-0";
-        tr.innerHTML = `
-          <td class="py-1.5 font-bold">${sc.title}</td>
-          <td class="py-1.5 truncate max-w-[120px]">${sc.description || '-'}</td>
-          <td class="py-1.5 text-right space-x-1.5">
-            <button onclick="alert('Kod:\\n\\n' + \`${sc.code.replace(/\n/g, '\\n')}\`)" class="text-indigo-600 font-bold">Kod</button>
-            <button onclick="deleteScript(${sc.id})" class="text-rose-500 font-bold">X</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
+    // RENDER FUNCTIONS
+    function renderHome() {
+      const activeRooms = rooms.filter(r => r.status === 'occupied');
+      document.getElementById('stat-occupancy').innerText = `${activeRooms.length} / ${rooms.length} xona`;
 
-      // Update select lists
-      const formScriptSelect = document.getElementById("form-cam-script-id");
-      formScriptSelect.innerHTML = `<option value="">-- Kod tanlash --</option>`;
-      scripts.forEach(sc => {
-        const opt = document.createElement("option");
-        opt.value = sc.id;
-        opt.innerText = sc.title;
-        formScriptSelect.appendChild(opt);
-      });
-
-      const mapScriptSelect = document.getElementById("map-script-select");
-      mapScriptSelect.innerHTML = `<option value="">Ssenariyni bekor qilish (Standart)</option>`;
-      scripts.forEach(sc => {
-        const opt = document.createElement("option");
-        opt.value = sc.id;
-        opt.innerText = sc.title;
-        mapScriptSelect.appendChild(opt);
-      });
-    }
-
-    // Function to render mappings
-    function renderMappings() {
-      const tbody = document.getElementById("mappings-tbody");
-      tbody.innerHTML = "";
-      cameras.forEach(cam => {
-        const tr = document.createElement("tr");
-        tr.className = "border-b border-[var(--border)] text-zinc-700 font-semibold last:border-0";
-        tr.innerHTML = `
-          <td class="py-1.5 font-bold">${cam.name}</td>
-          <td class="py-1.5">
-            ${cam.scriptTitle ? `<span class="bg-violet-50 text-violet-700 border border-violet-100 px-1.5 py-0.5 rounded text-[8px] font-bold">${cam.scriptTitle}</span>` : `<span class="text-zinc-400 italic text-[9px]">Ulanmagan (Standart)</span>`}
-          </td>
-          <td class="py-1.5 text-right">
-            ${cam.scriptTitle ? `<span class="text-emerald-600 font-bold text-[9px]">⚡ FAOL INTEGRATSIYA</span>` : `<span class="text-zinc-400">-</span>`}
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // Render visitor snapshots
-    function renderVisitors() {
-      const container = document.getElementById("visitor-log-container");
-      container.innerHTML = "";
-      visitors.forEach(vis => {
-        const card = document.createElement("div");
-        card.className = "bg-[var(--card)] border border-[var(--border)] rounded-2xl p-3 flex flex-col items-center space-y-2 text-center relative overflow-hidden group";
+      const container = document.getElementById('home-active-rooms');
+      container.innerHTML = '';
+      activeRooms.forEach(r => {
+        const card = document.createElement('div');
+        card.className = 'border border-[var(--card-border)] bg-[var(--bg-page)] p-3.5 rounded-2xl flex items-center justify-between';
         card.innerHTML = `
-          <div class="w-12 h-12 rounded-full border border-[var(--border)] bg-[var(--background)] flex items-center justify-center text-xl shadow-inner">${vis.emoji}</div>
-          <div class="space-y-0.5 w-full">
-            <div class="text-[9px] font-bold truncate">${vis.name}</div>
-            <div class="text-[8px] text-[var(--muted-foreground)] font-mono">${vis.time}</div>
+          <div>
+            <span class="text-xs font-bold text-[var(--text-main)]">${r.name}</span>
+            <div class="text-[10px] text-[var(--text-muted)]">${r.guest || 'Mehmon'}</div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-mono font-bold text-amber-600">${r.timeLeft} daqiqa</span>
+            <div class="text-[9px] text-[var(--text-muted)]">${r.total.toLocaleString()} UZS</div>
           </div>
         `;
         container.appendChild(card);
       });
     }
 
-    // Render rooms layout
-    function renderRooms() {
-      const grid = document.getElementById("rooms-grid");
-      grid.innerHTML = "";
-      rooms.forEach(rm => {
-        const card = document.createElement("div");
-        card.className = `border rounded-2xl p-4 text-left space-y-2 ${rm.active ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-[var(--card)] border-[var(--border)]'}`;
+    function renderRoomsGrids() {
+      const hammom = rooms.filter(r => r.type === 'Hammom');
+      const sauna = rooms.filter(r => r.type === 'Sauna');
+
+      const renderGrid = (list, containerId) => {
+        const c = document.getElementById(containerId);
+        c.innerHTML = '';
+        list.forEach(r => {
+          const isOcc = r.status === 'occupied';
+          const isClean = r.status === 'cleaning';
+          const card = document.createElement('div');
+          card.className = `border rounded-3xl p-5 space-y-4 shadow-xs transition hover:shadow-md cursor-pointer ${isOcc ? 'bg-amber-500/5 border-amber-500/30' : (isClean ? 'bg-blue-500/5 border-blue-500/30' : 'bg-[var(--card-bg)] border-[var(--card-border)]')}`;
+          card.onclick = () => openBookingModal(r.id);
+          card.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="text-xs font-black text-[var(--text-main)]">${r.name}</h4>
+                <span class="text-[10px] font-bold text-[var(--text-muted)]">${r.rate.toLocaleString()} UZS / soat</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${isOcc ? 'bg-amber-100 text-amber-800' : (isClean ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800')}">
+                ${isOcc ? 'Band' : (isClean ? 'Tozalanmoqda' : 'Bo\'sh')}
+              </span>
+            </div>
+            ${isOcc ? `
+              <div class="bg-[var(--card-bg)] p-3 rounded-2xl border border-[var(--card-border)] space-y-1">
+                <div class="text-[10px] font-bold text-[var(--text-main)]">${r.guest}</div>
+                <div class="flex justify-between text-[10px] font-mono text-[var(--text-muted)]">
+                  <span>Qolgan vaqt:</span>
+                  <span class="font-bold text-amber-600">${r.timeLeft} daqiqa</span>
+                </div>
+              </div>
+            ` : `
+              <div class="py-3 text-center text-xs font-bold text-emerald-600 border border-dashed border-emerald-300 rounded-2xl bg-emerald-50/50">
+                + Qabul qilish
+              </div>
+            `}
+          `;
+          c.appendChild(card);
+        });
+      };
+
+      renderGrid(hammom, 'hammom-grid');
+      renderGrid(sauna, 'sauna-grid');
+    }
+
+    function renderStaff() {
+      const tbody = document.getElementById('staff-table-body');
+      tbody.innerHTML = '';
+      staff.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-[var(--bg-page)] transition';
+        tr.innerHTML = `
+          <td class="p-4 font-bold text-[var(--text-main)] flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded-lg bg-[var(--bg-page)] border border-[var(--card-border)] flex items-center justify-center font-black">${s.name.charAt(0)}</div>
+            <span>${s.name}</span>
+          </td>
+          <td class="p-4">${s.role}</td>
+          <td class="p-4 font-mono text-[11px]">${s.phone}</td>
+          <td class="p-4 font-bold">${s.salary} UZS</td>
+          <td class="p-4"><span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">${s.kpi} ball</span></td>
+          <td class="p-4"><span class="text-emerald-600 font-bold">● ${s.status}</span></td>
+          <td class="p-4 text-right space-x-2">
+            <button onclick="showToast('${s.name} uchun oylik to\\'landi', 'success')" class="text-indigo-600 hover:underline font-bold text-[11px]">To'lash</button>
+            <button onclick="showToast('${s.name} uchun jarima/bonus qo\\'shildi', 'info')" class="text-amber-600 hover:underline font-bold text-[11px]">Bonus/Jarima</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderCameras() {
+      const tbody = document.getElementById('camera-table-body');
+      tbody.innerHTML = '';
+      cameras.forEach(cam => {
+        const tr = document.createElement('tr');
+        tr.className = 'font-semibold border-b border-[var(--card-border)]';
+        tr.innerHTML = `
+          <td class="py-3 font-bold">${cam.name}</td>
+          <td class="py-3">${cam.connectionType}</td>
+          <td class="py-3 font-mono text-[10px] text-zinc-500">${cam.connectionAddress}</td>
+          <td class="py-3">${cam.permissions}</td>
+          <td class="py-3"><span class="bg-[var(--bg-page)] border border-[var(--card-border)] px-2 py-0.5 rounded font-mono text-[9px]">${cam.token.substring(0, 10)}...</span></td>
+          <td class="py-3 text-right">
+            <button onclick="deleteCamera(${cam.id})" class="text-rose-500 hover:underline font-bold text-[10px]">O'chirish</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Update script select in generator form
+      const selectInForm = document.getElementById('cam-script-select');
+      selectInForm.innerHTML = `<option value="">-- Ssenariy tanlash (Ixtiyoriy) --</option>`;
+      scripts.forEach(sc => {
+        selectInForm.innerHTML += `<option value="${sc.id}">${sc.title}</option>`;
+      });
+
+      // Update mapping selects
+      const mapCam = document.getElementById('map-cam-select');
+      mapCam.innerHTML = '';
+      cameras.forEach(c => mapCam.innerHTML += `<option value="${c.id}">${c.name}</option>`);
+
+      const mapSc = document.getElementById('map-sc-select');
+      mapSc.innerHTML = '<option value="">(Standart Algoritm)</option>';
+      scripts.forEach(s => mapSc.innerHTML += `<option value="${s.id}">${s.title}</option>`);
+    }
+
+    function renderScripts() {
+      const tbody = document.getElementById('script-table-body');
+      tbody.innerHTML = '';
+      scripts.forEach(sc => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-[var(--card-border)]';
+        tr.innerHTML = `
+          <td class="p-1.5 font-bold">${sc.title}</td>
+          <td class="p-1.5 text-[var(--text-muted)] truncate max-w-[120px]">${sc.description}</td>
+          <td class="p-1.5 text-right space-x-1">
+            <button onclick="alert('Kod:\\n\\n' + \`${sc.code.replace(/\n/g, '\\n')}\`)" class="text-indigo-600 font-bold">Kod</button>
+            <button onclick="deleteScript(${sc.id})" class="text-rose-500 font-bold">✕</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Update mapping table
+      const mapTbody = document.getElementById('mapping-table-body');
+      mapTbody.innerHTML = '';
+      cameras.forEach(cam => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-[var(--card-border)]';
+        tr.innerHTML = `
+          <td class="p-1.5 font-bold">${cam.name}</td>
+          <td class="p-1.5">${cam.scriptTitle ? `<span class="bg-violet-100 text-violet-800 px-1.5 py-0.5 rounded text-[8px] font-bold">${cam.scriptTitle}</span>` : '<span class="text-zinc-400 italic">Standart</span>'}</td>
+          <td class="p-1.5 text-right">${cam.scriptTitle ? '<span class="text-emerald-600 font-bold text-[8px]">● FAOL</span>' : '-'}</td>
+        `;
+        mapTbody.appendChild(tr);
+      });
+    }
+
+    function renderVisitors() {
+      const grid = document.getElementById('visitor-grid');
+      grid.innerHTML = '';
+      visitors.forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-3 flex flex-col items-center space-y-2 text-center shadow-xs';
         card.innerHTML = `
-          <div class="flex justify-between items-center">
-            <span class="text-xs font-bold">${rm.type} #${rm.id}</span>
-            <span class="w-2 h-2 rounded-full ${rm.active ? 'bg-emerald-500' : 'bg-zinc-300'}"></span>
+          <div class="w-12 h-12 rounded-full border border-[var(--card-border)] bg-[var(--bg-page)] flex items-center justify-center text-xl shadow-inner">${v.emoji}</div>
+          <div>
+            <div class="text-[9px] font-bold truncate">${v.name}</div>
+            <div class="text-[8px] text-[var(--text-muted)] font-mono">${v.time}</div>
           </div>
-          <p class="text-[9px] text-[var(--muted-foreground)]">${rm.active ? rm.occupiedBy : 'Bo\'sh (Tayyor)'}</p>
         `;
         grid.appendChild(card);
       });
     }
 
-    // Form handlers
-    function generateCamera(e) {
+    function renderCustomers() {
+      const tbody = document.getElementById('customer-table-body');
+      tbody.innerHTML = '';
+      customers.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-[var(--bg-page)] transition';
+        tr.innerHTML = `
+          <td class="p-4 font-bold text-[var(--text-main)]">${c.name}</td>
+          <td class="p-4 font-mono text-[11px]">${c.phone}</td>
+          <td class="p-4 font-bold">${c.visits} marta</td>
+          <td class="p-4 font-bold">${c.spent} UZS</td>
+          <td class="p-4"><span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-800">${c.cashback}</span></td>
+          <td class="p-4 font-semibold ${c.balance.includes('Qarz') ? 'text-rose-600 font-bold' : ''}">${c.balance}</td>
+          <td class="p-4 text-right">
+            <button onclick="showToast('${c.name} profili ochildi', 'info')" class="text-[#c5a059] font-bold text-xs hover:underline">Tafsilot</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderFinance() {
+      const tbody = document.getElementById('finance-table-body');
+      tbody.innerHTML = '';
+      transactions.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-[var(--card-border)]';
+        tr.innerHTML = `
+          <td class="py-3 font-mono text-zinc-500">${t.time}</td>
+          <td class="py-3 font-bold ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">${t.type === 'income' ? 'Kirim' : 'Chiqim'}</td>
+          <td class="py-3 font-medium">${t.note}</td>
+          <td class="py-3 font-semibold">${t.method}</td>
+          <td class="py-3 font-bold font-mono ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">${t.amount} UZS</td>
+          <td class="py-3 text-zinc-500">${t.cashier}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderPartners() {
+      const tbody = document.getElementById('partners-table-body');
+      tbody.innerHTML = '';
+      partners.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-[var(--bg-page)] transition';
+        tr.innerHTML = `
+          <td class="p-4 font-bold text-[var(--text-main)]">${p.name}</td>
+          <td class="p-4">${p.type}</td>
+          <td class="p-4 font-mono">${p.phone}</td>
+          <td class="p-4 text-zinc-500">${p.lastDate}</td>
+          <td class="p-4 font-bold ${p.balance.includes('Qarzdorlik') ? 'text-rose-600' : 'text-emerald-600'}">${p.balance}</td>
+          <td class="p-4 text-right">
+            <button onclick="showToast('${p.name} hisoboti ochildi', 'info')" class="text-indigo-600 font-bold hover:underline">Hisob</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderWarehouse() {
+      const tbody = document.getElementById('warehouse-table-body');
+      tbody.innerHTML = '';
+      products.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-[var(--bg-page)] transition';
+        tr.innerHTML = `
+          <td class="p-4 font-mono text-[10px] text-zinc-500">${p.barcode}</td>
+          <td class="p-4 font-bold text-[var(--text-main)]">${p.name}</td>
+          <td class="p-4">${p.category}</td>
+          <td class="p-4 font-bold text-sm ${p.qty < 20 ? 'text-amber-600' : ''}">${p.qty} dona</td>
+          <td class="p-4 font-mono">${p.cost.toLocaleString()} UZS</td>
+          <td class="p-4 font-mono font-bold">${p.price.toLocaleString()} UZS</td>
+          <td class="p-4"><span class="px-2 py-0.5 rounded-full text-[9px] font-black ${p.qty < 20 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${p.qty < 20 ? 'Kam qolgan' : 'Yetarli'}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderAuditLogs() {
+      const tbody = document.getElementById('audit-table-body');
+      tbody.innerHTML = '';
+      auditLogs.forEach(l => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-[var(--card-border)]';
+        tr.innerHTML = `
+          <td class="py-3 font-mono text-zinc-500">${l.time}</td>
+          <td class="py-3 font-bold">${l.user}</td>
+          <td class="py-3"><span class="bg-[var(--bg-page)] px-2 py-0.5 rounded border border-[var(--card-border)] font-bold">${l.action}</span></td>
+          <td class="py-3 font-medium">${l.desc}</td>
+          <td class="py-3 font-mono text-zinc-400">${l.ip}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // SIMULATORS AND EVENT ACTIONS
+    function triggerSimulatedRfidTap() {
+      const uid = document.getElementById('rfid-uid-input').value || 'RFID-RC522-BAND-001';
+      const r8 = rooms.find(r => r.id === 8);
+      if (r8) {
+        if (r8.status === 'available') {
+          r8.status = 'occupied';
+          r8.guest = `RFID Mehmon (${uid})`;
+          r8.timeLeft = 120;
+          r8.total = 400000;
+          showToast(`💳 Karta tekkizildi (${uid}): 8-xona BAND qilindi!`, 'success');
+          auditLogs.unshift({ time: new Date().toLocaleTimeString(), user: "RFID Reader COM3", action: "Karta Tap", desc: `8-xona karta (${uid}) orqali ochildi`, ip: "COM3" });
+        } else {
+          r8.status = 'available';
+          r8.guest = null;
+          r8.timeLeft = 0;
+          showToast(`💳 Karta tekkizildi (${uid}): 8-xona BO'SHATILDI!`, 'info');
+          auditLogs.unshift({ time: new Date().toLocaleTimeString(), user: "RFID Reader COM3", action: "Karta Chiqish", desc: `8-xona karta (${uid}) orqali bo'shatildi`, ip: "COM3" });
+        }
+        renderHome();
+        renderRoomsGrids();
+        renderAuditLogs();
+      }
+    }
+
+    function triggerQuickRfid() {
+      triggerSimulatedRfidTap();
+    }
+
+    function simulateNewVisitorFace() {
+      const emojis = ['🧔', '👨', '🧑', '👱', '🧔‍♂️'];
+      const pick = emojis[Math.floor(Math.random() * emojis.length)];
+      const num = 112 + visitors.length;
+      visitors.unshift({
+        id: Date.now(),
+        name: `Yangi Mehmon #${num}`,
+        time: new Date().toLocaleTimeString(),
+        date: "05.09.2026",
+        emoji: pick
+      });
+      renderVisitors();
+      showToast(`📷 Kassa kamerasi yangi mijoz yuzini aniqladi (#${num})!`, 'success');
+      auditLogs.unshift({ time: new Date().toLocaleTimeString(), user: "Kassa Datchigi", action: "Face Detect", desc: `Yangi mijoz aniqlandi (#${num})`, ip: "REMOTE_API" });
+      renderAuditLogs();
+    }
+
+    function simulateScanSearch() {
+      const code = document.getElementById('scan-barcode-input').value.trim();
+      const p = products.find(x => x.barcode === code) || products[0];
+      const box = document.getElementById('scan-result-box');
+      box.classList.remove('hidden');
+      box.innerHTML = `
+        <div class="flex justify-between items-center">
+          <div>
+            <h4 class="text-sm font-bold text-[var(--text-main)]">${p.name}</h4>
+            <span class="text-[10px] text-[var(--text-muted)]">${p.category} • Shtrixkod: ${p.barcode}</span>
+          </div>
+          <span class="text-lg font-black text-emerald-600">${p.price.toLocaleString()} UZS</span>
+        </div>
+        <div class="flex space-x-2 pt-2 border-t border-[var(--card-border)]">
+          <button onclick="p.qty++; renderWarehouse(); simulateScanSearch(); showToast('Ombor qoldig\\'i 1 taga oshirildi', 'success');" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold">+ 1 ta Qabul Qilish</button>
+          <button onclick="p.qty--; renderWarehouse(); simulateScanSearch(); showToast('Tovar sotildi (-1 dona)', 'info');" class="bg-zinc-800 text-white px-3 py-1.5 rounded-lg text-xs font-bold">- 1 ta Sotish</button>
+        </div>
+      `;
+    }
+
+    // MODAL HANDLERS
+    function openBookingModal(roomId) {
+      const r = rooms.find(x => x.id === roomId);
+      if (!r) return;
+      document.getElementById('modal-room-id').value = r.id;
+      document.getElementById('modal-room-title').innerText = `${r.name} - Qabul qilish`;
+      document.getElementById('modal-hourly-rate').value = r.rate;
+      document.getElementById('booking-modal').classList.remove('hidden');
+    }
+
+    function submitBooking(e) {
       e.preventDefault();
-      const name = document.getElementById("form-cam-name").value;
-      const type = document.getElementById("form-cam-type").value;
-      const address = document.getElementById("form-cam-address").value;
-      const perm = document.getElementById("form-cam-perm").value;
-      const scriptId = document.getElementById("form-cam-script-id").value;
-      
-      let scriptTitle = "";
-      if (scriptId) {
-        const selected = scripts.find(s => s.id === Number(scriptId));
-        if (selected) scriptTitle = selected.title;
+      const roomId = Number(document.getElementById('modal-room-id').value);
+      const guest = document.getElementById('modal-guest-name').value;
+      const hours = Number(document.getElementById('modal-duration').value);
+      const rate = Number(document.getElementById('modal-hourly-rate').value);
+
+      const r = rooms.find(x => x.id === roomId);
+      if (r) {
+        r.status = 'occupied';
+        r.guest = guest;
+        r.timeLeft = hours * 60;
+        r.rate = rate;
+        r.total = hours * rate;
+
+        showToast(`${r.name} ${guest} uchun band qilindi!`, 'success');
+        auditLogs.unshift({ time: new Date().toLocaleTimeString(), user: currentRole, action: "Xona Bron", desc: `${r.name} ${guest} uchun ${hours} soatga ochildi`, ip: "192.168.1.10" });
+        renderHome();
+        renderRoomsGrids();
+        renderAuditLogs();
+        closeModal('booking-modal');
+      }
+    }
+
+    function openFinanceModal(type) {
+      document.getElementById('finance-modal-type').value = type;
+      document.getElementById('finance-modal-title').innerText = type === 'income' ? 'Kassaga Kirim Qilish' : 'Chiqim / Xarajat Qilish';
+      document.getElementById('finance-modal').classList.remove('hidden');
+    }
+
+    function submitFinance(e) {
+      e.preventDefault();
+      const type = document.getElementById('finance-modal-type').value;
+      const amount = Number(document.getElementById('finance-amount').value);
+      const method = document.getElementById('finance-method').value;
+      const note = document.getElementById('finance-note').value;
+
+      const methodNames = { cash: "Naqd pul", card: "Plastik", online: "Click" };
+      transactions.unshift({
+        id: Date.now(),
+        time: new Date().toLocaleTimeString().substring(0, 5),
+        type,
+        note,
+        method: methodNames[method] || "Naqd",
+        amount: (type === 'income' ? '+' : '-') + amount.toLocaleString(),
+        cashier: document.getElementById('user-name').innerText
+      });
+
+      renderFinance();
+      showToast(`Muvaffaqiyatli: ${type === 'income' ? 'Kirim' : 'Chiqim'} saqlandi!`, 'success');
+      closeModal('finance-modal');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    // Camera Handlers
+    function handleCreateCamera(e) {
+      e.preventDefault();
+      const name = document.getElementById('cam-name-input').value;
+      const type = document.getElementById('cam-type-input').value;
+      const perm = document.getElementById('cam-perm-input').value;
+      const addr = document.getElementById('cam-address-input').value;
+      const scId = document.getElementById('cam-script-select').value;
+
+      let scTitle = "";
+      if (scId) {
+        const sc = scripts.find(s => s.id === Number(scId));
+        if (sc) scTitle = sc.title;
       }
 
       cameras.push({
         id: Date.now(),
         name,
         connectionType: type,
-        connectionAddress: address,
+        connectionAddress: addr,
         permissions: perm,
-        token: "tok_sauna_" + Math.random().toString(36).substring(2, 8),
-        scriptTitle
+        token: "tok_sauna_" + Math.random().toString(36).substring(2, 9),
+        scriptTitle: scTitle
       });
 
       renderCameras();
-      renderMappings();
-      e.target.reset();
-    }
-
-    // Script library helpers
-    function addScript(e) {
-      e.preventDefault();
-      const title = document.getElementById("script-title").value;
-      const description = document.getElementById("script-desc").value;
-      const code = document.getElementById("script-code").value;
-
-      scripts.push({
-        id: Date.now(),
-        title,
-        description,
-        code
-      });
-
       renderScripts();
       e.target.reset();
-    }
-
-    function integrateCameraScript(e) {
-      e.preventDefault();
-      const camId = document.getElementById("map-camera-select").value;
-      const scriptId = document.getElementById("map-script-select").value;
-
-      const cam = cameras.find(c => c.id === Number(camId));
-      if (cam) {
-        if (scriptId) {
-          const sc = scripts.find(s => s.id === Number(scriptId));
-          cam.scriptTitle = sc ? sc.title : "";
-        } else {
-          cam.scriptTitle = "";
-        }
-      }
-
-      renderMappings();
-      e.target.reset();
+      showToast('Yangi kamera va API tokeni muvaffaqiyatli yaratildi!', 'success');
     }
 
     function deleteCamera(id) {
       cameras = cameras.filter(c => c.id !== id);
       renderCameras();
-      renderMappings();
+      renderScripts();
+      showToast('Kamera o\'chirildi', 'info');
+    }
+
+    function handleCreateScript(e) {
+      e.preventDefault();
+      const title = document.getElementById('new-script-title').value;
+      const desc = document.getElementById('new-script-desc').value;
+      const code = document.getElementById('new-script-code').value;
+
+      scripts.push({ id: Date.now(), title, description: desc, code });
+      renderScripts();
+      renderCameras();
+      e.target.reset();
+      showToast('Ssenariy kutubxonaga qo\'shildi!', 'success');
     }
 
     function deleteScript(id) {
       scripts = scripts.filter(s => s.id !== id);
-      cameras.forEach(c => {
-        c.scriptTitle = "";
-      });
+      cameras.forEach(c => { c.scriptTitle = ''; });
       renderScripts();
-      renderMappings();
+      renderCameras();
+      showToast('Ssenariy o\'chirildi', 'info');
     }
 
-    function onFormScriptChange() {
-      const scriptId = document.getElementById("form-cam-script-id").value;
-      const codeArea = document.getElementById("form-cam-code");
-      if (scriptId) {
-        const sc = scripts.find(s => s.id === Number(scriptId));
-        codeArea.value = sc ? sc.code : "";
+    function onSelectScriptInForm(id) {
+      const codeArea = document.getElementById('cam-code-input');
+      if (id) {
+        const sc = scripts.find(s => s.id === Number(id));
+        codeArea.value = sc ? sc.code : '';
       } else {
-        codeArea.value = "";
+        codeArea.value = '';
       }
     }
 
-    // Settings helpers
-    function changeLanguage(lang) {
-      currentLang = lang;
-      updateTranslations();
+    function handleMapIntegration(e) {
+      e.preventDefault();
+      const camId = document.getElementById('map-cam-select').value;
+      const scId = document.getElementById('map-sc-select').value;
+
+      const cam = cameras.find(c => c.id === Number(camId));
+      if (cam) {
+        if (scId) {
+          const sc = scripts.find(s => s.id === Number(scId));
+          cam.scriptTitle = sc ? sc.title : '';
+        } else {
+          cam.scriptTitle = '';
+        }
+      }
+      renderScripts();
+      showToast('Integratsiya yangilandi!', 'success');
     }
 
-    function changeTheme(theme) {
-      document.body.className = `bg-[var(--background)] text-[var(--foreground)] min-h-screen font-sans transition-colors duration-200 theme-${theme}`;
+    function updateCashierPerms() {
+      permissions.cashierViewKpi = document.getElementById('perm-kpi').checked;
+      permissions.cashierViewFinance = document.getElementById('perm-finance').checked;
+      permissions.cashierViewWarehouse = document.getElementById('perm-warehouse').checked;
+      applyRoleAccess();
+      showToast('Kassir ruxsatlari yangilandi', 'success');
     }
 
-    function switchTab(tabId) {
-      document.getElementById("tab-face_id").classList.add("hidden");
-      document.getElementById("tab-dashboard_home").classList.add("hidden");
-      document.getElementById("tab-rooms").classList.add("hidden");
-      document.getElementById("tab-staff").classList.add("hidden");
-      document.getElementById("tab-settings").classList.add("hidden");
-
-      document.querySelectorAll("#sidebar-nav button").forEach(btn => {
-        btn.classList.remove("bg-[var(--background)]");
-      });
-
-      document.getElementById(`tab-${tabId}`).classList.remove("hidden");
-      document.getElementById(`nav-${tabId}`).classList.add("bg-[var(--background)]");
+    function clearAuditLogs() {
+      auditLogs = [];
+      renderAuditLogs();
+      showToast('Audit jurnali tozalandi', 'info');
     }
 
-    // Set clock
+    // Real-time Clock
     setInterval(() => {
-      document.getElementById("live-clock").innerText = new Date().toLocaleTimeString();
+      document.getElementById('live-clock').innerText = new Date().toLocaleTimeString();
     }, 1000);
 
-    // Initial setup
+    // Initial Boots
+    renderHome();
+    renderRoomsGrids();
+    renderStaff();
     renderCameras();
     renderScripts();
-    renderMappings();
     renderVisitors();
-    renderRooms();
-    updateTranslations();
-
+    renderCustomers();
+    renderFinance();
+    renderPartners();
+    renderWarehouse();
+    renderAuditLogs();
+    applyRoleAccess();
   </script>
 </body>
 </html>
